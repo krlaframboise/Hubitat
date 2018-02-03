@@ -60,7 +60,7 @@ metadata {
 		}
 		
 		input "tempOffset", "number",
-			title: getInputTitle("Temperature Offset", ["-100~-1 = -10° to -0.1°", "0 = No Offset", "1~100 = 0.1° to 10°"]),
+			title: getInputTitle("Temperature Offset", ["-100~-1 = -10Â° to -0.1Â°", "0 = No Offset", "1~100 = 0.1Â° to 10Â°"]),
 			range: "-100..100",
 			defaultValue: 0, 
 			required: false,
@@ -108,7 +108,7 @@ metadata {
 		}
 
 		valueTile("temperature", "device.temperature", inactiveLabel: false, width: 2, height: 2) {
-			state "temperature", label:'${currentValue}°',
+			state "temperature", label:'${currentValue}Â°',
 				backgroundColors:[
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
@@ -451,12 +451,12 @@ private sendTempEvent(origVal, scale, prec) {
 	
 	val = roundTwoPlaces(safeToDec(val) + safeToDec(tempOffsetSetting * 0.1))
 	
-	logDebug "Temperature is ${val}°${localScale}"
+	logDebug "Temperature is ${val}Â°${localScale}"
 	
 	state.origTemp = [temp: origVal, scale: scale, prec: prec]
 	
 	sendEvent(createEventMap("temperature", val, null, null, localScale))
-	sendStatusEvent("Temperature", "${val}°${localScale}")
+	sendStatusEvent("Temperature", "${val}Â°${localScale}")
 }
 
 private sendHumidityEvent(origVal) {
@@ -552,7 +552,7 @@ private getReportingIntervalParam() {
 }
 
 private getTempReportingParam() {
-	return [num:7, name:"Temperature Reporting Threshold", size:1, type:"number", min:0, max:70, defaultVal:2, details:["0 = Disabled", "1~70 = 1°C to 70°C"], prefName:"tempReporting"]	
+	return [num:7, name:"Temperature Reporting Threshold", size:1, type:"number", min:0, max:70, defaultVal:2, details:["0 = Disabled", "1~70 = 1Â°C to 70Â°C"], prefName:"tempReporting"]	
 }
 
 private getHumidityReportingParam() {
