@@ -88,21 +88,20 @@ metadata {
 
 
 def updated() {		
-	def result = []
-	if (!isDuplicateCommand(state.lastUpdated, 3000)) {
-		logTrace "updated()"
-		
-		if (!state.lastUpdated) {
-			result += delayBetween([
-				switchBinaryGetCmd(), 
-				batteryGetCmd()
-			], 250)
-		}
-		state.lastUpdated = new Date().time
-		
-		initializeCheckinSchedule()	
+	def result = []	
+	logTrace "updated()"
+	
+	if (!state.lastUpdated) {
+		result += delayBetween([
+			switchBinaryGetCmd(), 
+			batteryGetCmd()
+		], 500)
 	}
-	return result ? response(result) : []
+	state.lastUpdated = new Date().time
+	
+	initializeCheckinSchedule()	
+	
+	return result
 }
 
 private initializeCheckinSchedule(){
@@ -157,7 +156,10 @@ def ping() {
 
 def refresh() {
 	logTrace "refresh()"
-	return [switchBinaryGetCmd(), batteryGetCmd()]
+	return delayBetween([
+		switchBinaryGetCmd(), 
+		batteryGetCmd()
+	], 1000)
 }
 
 def on() {	
