@@ -1,10 +1,10 @@
 /**
- *  Everspring Temperature/Humidity Detector v1.0 (HUBITAT)
+ *  HUBITAT: Everspring Temperature/Humidity Detector v1.0.1 
  *  (Model: ST814-2)
  *
  *  Changelog:
  *
- *    1.0 (10/07/2017)
+ *    1.0.1 (02/10/2018)
  *      - Initial Release
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -160,8 +160,8 @@ private getInputTitle(title, details) {
 
 def updated() {
 	def result = []
-	if (!isDuplicateCommand(state.lastUpdated, 3000)) {		
-		state.lastUpdated = new Date().time
+	// if (!isDuplicateCommand(state.lastUpdated, 3000)) {		
+		// state.lastUpdated = new Date().time
 		logTrace "updated()"
 		
 		if (state.tempOffset != tempOffsetSetting && state.origTemp != null) {
@@ -189,8 +189,8 @@ def updated() {
 		if (checkForPendingChanges()) {
 			logDebug "The configuration will be updated the next time the device wakes up."
 		}		
-	}		
-	return result
+	// }		
+	return result	
 }
 
 def configure() {	
@@ -291,6 +291,36 @@ def parse(String description) {
 
 def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpNotification cmd) {
 	logTrace "WakeUpNotification: $cmd"
+	// def cmds = []
+	
+	// if (checkForPendingChanges()) {
+		// cmds += configure()
+	// }
+	
+	// if (canReportBattery()) {
+		// cmds << batteryGetCmd()
+	// }
+	
+	// if (getAttrValue("temperature") == null) {
+		// cmds << sensorMultilevelGetCmd(sensorTemp)
+	// }
+	
+	// if (getAttrValue("humidity") == null) {
+		// cmds << sensorMultilevelGetCmd(sensorHumidity)
+	// }
+			
+	// if (cmds) {
+		// cmds << "delay 10000"
+	// }		
+	// cmds << wakeUpNoMoreInfoCmd()
+	
+	// return response(cmds)
+	
+	return response(handleWakeupEvent())
+}
+
+def handleWakeupEvent() {
+	logTrace "handleWakeupEvent()"
 	def cmds = []
 	
 	if (checkForPendingChanges()) {
@@ -314,36 +344,7 @@ def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpNotification cmd) {
 	}		
 	cmds << wakeUpNoMoreInfoCmd()
 	
-	return response(cmds)
-}
-
-private handleWakeupEvent(canConfigure) {
-	logTrace "handleWakeupEvent(${canConfigure})"
-	// def cmds = []
-	
-	// if (canConfigure && checkForPendingChanges()) {
-		// cmds += configure()
-	// }
-	
-	// if (canReportBattery()) {
-		// cmds << batteryGetCmd()
-	// }
-	
-	// if (getAttrValue("temperature") == null) {
-		// cmds << sensorMultilevelGetCmd(sensorTemp)
-	// }
-	
-	// if (getAttrValue("humidity") == null) {
-		// cmds << sensorMultilevelGetCmd(sensorHumidity)
-	// }
-			
-	// if (cmds) {
-		// cmds << "delay 1000"
-	// }		
-	// // cmds << wakeUpNoMoreInfoCmd()
-	
-	// return response(cmds)
-	return []
+	return cmds
 }
 
 private canReportBattery() {
@@ -421,26 +422,26 @@ def finalizeConfiguration() {
 }
 
 def zwaveEvent(hubitat.zwave.commands.sensormultilevelv5.SensorMultilevelReport cmd) {
-	def cmds = []
-	// logTrace "SensorMultilevelReport: ${cmd}"
-	
-	// def canConfigure = false
+	def result = []
+	logTrace "SensorMultilevelReport: ${cmd}"
+		
 	switch (cmd.sensorType) {
 		case sensorTemp.sensorType:
 			sendTempEvent(cmd.scaledSensorValue, cmd.scale, cmd.precision)
-			// canConfigure = true			
+	
+			runIn(3, handleWakeupEvent)  // Handle like wakeup event because the device stays awake for 10 minutes every time it sends a report.			
 			break
+			
 		case sensorHumidity.sensorType:
 			sendHumidityEvent(cmd.scaledSensorValue)
 			break
+		
 		default:
 			logDebug "Unknown Sensor Type: ${cmd}"
 	} 
 	
-	// cmds += handleWakeupEvent(canConfigure)  // Handle like wakeup event because the device stays awake for 10 minutes every time it sends a report.
-	
 	// return cmds ? response(cmds) : []
-	return []
+	return result
 }
 
 private sendTempEvent(origVal, scale, prec) {
@@ -685,5 +686,5 @@ private logDebug(msg) {
 }
 
 private logTrace(msg) {
-	// log.trace "$msg"
+	 // log.trace "$msg"
 }
