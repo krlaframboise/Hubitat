@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Dome Motion Sensor v1.0
+ *  HUBITAT: Dome Motion Sensor v0.0
  *  (Model: DMMS1)
  *
  *  Author: 
@@ -7,8 +7,8 @@
  *
  *  Changelog:
  *
- *    1.0 (02/10/2018)
- *      - Initial Release
+ *    0.0 (02/13/2018)
+ *      - Beta Release
  *
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
