@@ -234,9 +234,9 @@ private checkForPendingChanges() {
 			changes += 1
 		}
 	}
-	if (checkinIntervalChanged) {
-		changes += 1
-	}
+	// if (checkinIntervalChanged) {
+		// changes += 1
+	// }
 	if (changes != getAttrValue("pendingChanges")) {
 		sendEvent(createEventMap("pendingChanges", changes, "", false))
 	}
