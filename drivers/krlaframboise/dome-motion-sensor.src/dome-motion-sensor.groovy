@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Dome Motion Sensor v0.0
+ *  HUBITAT: Dome Motion Sensor v0.0.1
  *  (Model: DMMS1)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    0.0 (02/13/2018)
+ *    0.0.1 (02/17/2018)
  *      - Beta Release
  *
  *
@@ -21,6 +21,11 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+private getDriverDetails() { 
+	return "<br>Dome Motion Sensor<br>Version 0.0.1<br>Supported Devices: DMMS1"
+}
+ 
 metadata {
 	definition (
 		name: "Dome Motion Sensor", 
@@ -41,8 +46,6 @@ metadata {
 		
 		fingerprint mfr:"021F", prod:"0003", model:"0083"
 	}
-	
-	simulator { }
 	
 	preferences {
 		input "ledEnabled", "enum",
@@ -98,52 +101,25 @@ metadata {
 			defaultValue: true, 
 			required: false
 	}
-
-	tiles(scale: 2) {
-		multiAttributeTile(name:"motion", type: "generic", width: 6, height: 4, canChangeIcon: false){
-			tileAttribute ("device.motion", key: "PRIMARY_CONTROL") {
-				attributeState "inactive", 
-					label:'No Motion', 
-					icon:"st.motion.motion.inactive", 
-					backgroundColor:"#cccccc"
-				attributeState "active", 
-					label:'Motion', 
-					icon:"st.motion.motion.active", 
-					backgroundColor:"#00a0dc"
-			}			
-			tileAttribute ("device.illuminance", key: "SECONDARY_CONTROL") {
-				attributeState "illuminance", 
-					label:'Light is ${currentValue} lux', 
-					backgroundColor:"#ffffff"
-			}
-		}	
-		
-		valueTile("illuminance", "device.illuminance", decoration: "flat", width: 2, height: 2){
-			state "illuminance", label:'Light\n${currentValue} lx', unit: ""
-		}	
-		
-		standardTile("refresh", "device.refresh", width: 2, height: 2) {
-			state "refresh", label:'Refresh', action: "refresh", icon:"st.secondary.refresh-icon"
-		}
-		
-		valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2){
-			state "battery", label:'${currentValue}% battery', unit:""
-		}
-					
-		main "motion"
-		details(["motion", "illuminance", "refresh", "battery"])
-	}
 }
 
-// Sets flag so that configuration is updated the next time it wakes up.
-def updated() {	
-	// This method always gets called twice when preferences are saved.
-	if (!isDuplicateCommand(state.lastUpdated, 3000)) {		
-		state.lastUpdated = new Date().time
-		logTrace("updated()")
+def installed() {
+	logTrace "installed()"
+	updateDriverDetails()
+}
 
-		logForceWakeupMessage "The configuration will be updated the next time the device wakes up."
-	}		
+def updated() {		
+	logTrace("updated()")
+
+	logForceWakeupMessage "The configuration will be updated the next time the device wakes up."
+	
+	updateDriverDetails()
+}
+
+private updateDriverDetails() {
+	if (driverDetails != getDataValue("driverDetails")) {
+		updateDataValue("driverDetails", driverDetails)
+	}
 }
 
 // Initializes the device state when paired and updates the device's configuration.
