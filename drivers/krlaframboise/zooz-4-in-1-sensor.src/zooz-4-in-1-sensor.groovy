@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Zooz 4-in-1 Sensor v1.0.0
+ *  HUBITAT: Zooz 4-in-1 Sensor v1.0.1
  *		(Model: ZSE40)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    1.0.0 (02/15/2018)
+ *    1.0.1 (02/15/2018)
  *    	- Initial Release
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,7 @@
  */
 
 private getDriverDetails() { 
-	return "<br>Zooz 4-in-1 Sensor<br>Version 1.0.0<br>Suported Devices: ZSE40"
+	return "<br>Zooz 4-in-1 Sensor<br>Version 1.0.1<br>Supported Devices: ZSE40"
 }
  
 metadata {
@@ -57,8 +57,6 @@ metadata {
 		fingerprint deviceId: "2101", inClusters: "0x5E,0x86,0x72,0x5A,0x85,0x59,0x73,0x80,0x71,0x31,0x70,0x84,0x7A,0x98", outClusters: "", mfr:"0109", prod:"2021", deviceJoinName: "Zooz 4-in-1 Multisensor"		
 	}
 	
-	simulator { }
-	
 	preferences {
 		input "primaryTileStatus", "enum",
 			title: "Primary Status:",
@@ -91,88 +89,7 @@ metadata {
 		getNumberInput("reportBatteryEvery", "Battery Reporting Interval [1-167]\n(1 = 1 Hour)\n(167 = 7 Days)\nThis setting can't be less than the Minimum Check-in Interval.", "1..67", batteryReportingIntervalSetting)
 		getBoolInput("autoClearTamper", "Automatically Clear Tamper?\n(The tamper detected event is raised when the device is opened.  This setting allows you to decide whether or not to have the clear event automatically raised when the device closes.)", false)
 		getBoolInput("debugOutput", "Enable debug logging?", true)
-	}
-
-	tiles(scale: 2) {
-		multiAttributeTile(name:"mainTile", type: "generic", width: 6, height: 4){
-			tileAttribute ("device.primaryStatus", key: "PRIMARY_CONTROL") {
-				attributeState "primaryStatus", 
-					label:'${currentValue}', 
-					icon:"st.motion.motion.inactive",
-					backgroundColor:"#ffffff"			
-				attributeState "inactive", 
-					label:'NO MOTION', 
-					icon:"st.motion.motion.inactive", 
-					backgroundColor:"#ffffff"
-				attributeState "active", 
-					label:'MOTION', 
-					icon:"st.motion.motion.active", 
-					backgroundColor:"#00a0dc"
-			}
-			tileAttribute ("device.secondaryStatus", key: "SECONDARY_CONTROL") {
-				attributeState "default", label:'${currentValue}'
-				attributeState "inactive", label:'NO MOTION'
-				attributeState "active", label:'MOTION'
-			}
-		}
-		
-		valueTile("temperature", "device.temperature", inactiveLabel: false, width: 2, height: 2) {
-			state "temperature", label:'${currentValue}°',
-			backgroundColors:[
-				[value: 31, color: "#153591"],
-				[value: 44, color: "#1e9cbb"],
-				[value: 59, color: "#90d2a7"],
-				[value: 74, color: "#44b621"],
-				[value: 84, color: "#f1d801"],
-				[value: 95, color: "#d04e00"],
-				[value: 96, color: "#bc2323"]
-			]
-		}
-		
-		valueTile("humidity", "device.humidity", decoration: "flat", inactiveLabel: false, width: 2, height: 2){
-			state "humidity", label:'${currentValue}% \nRH', unit:""
-		}
-		
-		valueTile("pLight", "device.pLight", decoration: "flat", inactiveLabel: false, width: 2, height: 2){
-			state "pLight", label:'${currentValue}% \nLight', unit: ""
-		}
-
-		valueTile("lxLight", "device.lxLight", decoration: "flat", width: 2, height: 2){
-			state "lxLight", label:'${currentValue}lx \nLight', unit: ""
-		}
-		
-		valueTile("motion", "device.motion", width: 2, height: 2){
-			state "inactive", label:'No \nMotion', backgroundColor:"#ffffff"
-			state "active", label:'Motion', backgroundColor:"#00a0dc"
-		}
-		
-		valueTile("tampering", "device.tamper", width: 2, height: 2) {			
-			state "clear", label:'Tamper \nClear', backgroundColor:"#ffffff"
-			state "detected", label:'Tamper \nDetected', backgroundColor: "#e86d13"
-		}
-		
-		valueTile("battery", "device.battery", decoration: "flat", inactiveLabel: false, width: 2, height: 2){
-			state "default", label:'${currentValue}% \nBattery', unit: ""
-		}
-			
-		
-		valueTile("pending", "device.pendingChanges", decoration: "flat", width: 2, height: 2){
-			state "pendingChanges", label:'${currentValue} Change(s) Pending'
-			state "0", label: ''
-			state "-1", label:'Updating Settings'
-		}
-		
-		valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", inactiveLabel:false, width: 2, height: 2){
-			state "lastUpdate", label:'Settings\nUpdated\n\n${currentValue}'
-		}
-		
-		standardTile("refresh", "device.refresh", inactiveLabel: false, width: 2, height: 2) {
-			state "default", label: "Refresh", action: "refresh", icon:"st.secondary.refresh-icon"
-		}
-		
-		main("mainTile")
-		details(["mainTile", "humidity", "temperature", "lxLight", "battery", "pLight", "motion", "tampering",  "lastUpdate", "refresh","pending"])
-	}
+	}	
 }
 
 private getNumberInput(name, title, range, defaultVal) {	
