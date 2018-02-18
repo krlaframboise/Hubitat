@@ -1,15 +1,12 @@
 /**
- *  (HUBITAT) Ecolink Wireless Switch v1.0.1
+ *  HUBITAT: Ecolink Wireless Switch v1.0.2
  *  (Models: TLS-ZWAVE5, DLS-ZWAVE5, DDLS2-ZWAVE5)
  *
  *  Author: 
  *    Kevin LaFramboise (krlaframboise)
  *
- *  URL to documentation: 
- *    
- *
  *  Changelog:
- *    1.0.1 (02/10/2018)
+ *    1.0.2 (02/18/2018)
  *      - Initial Release
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +19,11 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
+private getDriverDetails() { 
+	return "<br>Ecolink Wireless Switch<br>Version 1.0.2<br>Supported Devices: TLS-ZWAVE5, DLS-ZWAVE5, DDLS2-ZWAVE5"
+} 
+
 metadata {
 	definition (
 		name: "Ecolink Wireless Switch", 
@@ -34,19 +36,17 @@ metadata {
  		capability "Switch"
 		capability "Light"
 		capability "Battery"
-		capability "Health Check"
 		capability "Refresh"
-		
+		// capability "Health Check"
+				
 		attribute "lastCheckIn", "string"
-					
-		fingerprint mfr:"014A", prod:"0006", model:"0001", deviceJoinName: "Ecolink Rocker Switch"
+				
+		fingerprint deviceId: "0001", inClusters: "0x5E,0x86,0x72,0x73,0x80,0x25,0x85,0x59,0x7A", outClusters: "", mfr:"014A", prod:"0006", deviceJoinName: "Ecolink Rocker Switch"
 		
-		fingerprint mfr:"014A", prod:"0006", model:"0002", deviceJoinName: "Ecolink Toggle Switch"
-		
-		fingerprint mfr:"014A", prod:"0006", model:"0003", deviceJoinName: "Ecolink Double Rocker Switch"
-	}
+		fingerprint deviceId: "0002", inClusters: "0x5E,0x86,0x72,0x73,0x80,0x25,0x85,0x59,0x7A", outClusters: "", mfr:"014A", prod:"0006", deviceJoinName: "Ecolink Toggle Switch"
 
-	simulator { }
+		fingerprint deviceId: "0003", inClusters: "0x5E,0x86,0x72,0x73,0x80,0x25,0x85,0x59,0x7A", outClusters: "", mfr:"014A", prod:"0006", deviceJoinName: "Ecolink Double Rocker Switch"
+	}
 
 	preferences { 
 		input "checkInInterval", "enum",
@@ -60,59 +60,35 @@ metadata {
 			defaultValue: true, 
 			required: false
 	}
-	
-	tiles(scale: 2) {
-		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: false){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "on", label: '${name}', action: "switch.off", nextState: "turningOff", icon: "st.switches.switch.on", backgroundColor: "#00A0DC"
-				attributeState "turningOff", label: 'Turning Off', action: "switch.on", nextState: "turningOn", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
-				attributeState "off", label: '${name}', action: "switch.on", nextState: "turningOn", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
-				attributeState "turningOn", label: 'Turning On', action: "switch.off", nextState: "turningOff", icon: "st.switches.switch.on", backgroundColor: "#00A0DC"
-			}
-			tileAttribute ("device.battery", key: "SECONDARY_CONTROL") {
-				attributeState "battery", label:'Battery ${currentValue}%'
-			}
-		}
-		
-		standardTile("refresh", "generic", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-			state "default", label:'Refresh', action:"refresh.refresh", icon:"st.secondary.refresh-icon"
-		}
-		
-		valueTile("lastActivity", "device.lastCheckIn", decoration: "flat", inactiveLabel:false, width: 2, height: 2){
-			state "lastCheckIn", label:'Last\nActivity\n\n${currentValue}'
-		}
-		
-		valueTile("battery", "device.battery", decoration: "flat", inactiveLabel: false, width: 2, height: 2){
-			state "default", label:'${currentValue}% \nBattery', unit: ""
-		}
+}
 
-		main "switch"
-		details(["switch","refresh","lastActivity","battery"])
+def installed() {
+	logTrace "installed()"
+	
+	updateDriverDetails()
+	
+	return delayBetween([
+		switchBinaryGetCmd(), 
+		batteryGetCmd()
+	], 500)	
+}
+
+def updated() {		
+	logTrace "updated()"
+		
+	initializeCheckInSchedule()
+	
+	updateDriverDetails()
+}
+
+private updateDriverDetails() {
+	if (driverDetails != getDataValue("driverDetails")) {
+		updateDataValue("driverDetails", driverDetails)
 	}
 }
 
-
-def updated() {		
-	def result = []
-	// if (!isDuplicateCommand(state.lastUpdated, 3000)) {
-		logTrace "updated()"
-		
-		if (!state.lastUpdated) {
-			result += delayBetween([
-				switchBinaryGetCmd(), 
-				batteryGetCmd()
-			], 500)
-		}
-		state.lastUpdated = new Date().time
-		
-		initializeCheckInSchedule()	
-	// }
-	// return result ? response(result) : []
-	return result
-}
-
 private initializeCheckInSchedule(){
-	sendEvent(name: "checkInterval", value: ((checkInIntervalSettingMinutes * 2 * 60) + (60 * 2)), displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID, offlinePingable: "1"])
+	// sendEvent(name: "checkInterval", value: ((checkInIntervalSettingMinutes * 2 * 60) + (60 * 2)), displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID, offlinePingable: "1"])
 
 	unschedule()
 	
@@ -135,7 +111,6 @@ def scheduledCheckIn() {
 	def result = []
 	if (canCheckIn()) {
 		logTrace "scheduledCheckIn()"
-		// result += sendResponse([batteryGetCmd()])
 		result << batteryGetCmd()
 	}
 	else {
@@ -145,22 +120,14 @@ def scheduledCheckIn() {
 }
 
 private canCheckIn() {
-	return (!state.lastCheckIn || ((new Date().time) - state.lastCheckIn > (checkInIntervalSettingMinutes * 60 * 1000))) 
+	def checkInIntervalMS = ((checkInIntervalSettingMinutes * 60 * 1000) - 5000) // Subtract 5 seconds because the last check in time i stored when the device responses which is a couple of seconds after the scheduled method executes.
+	return (!state.lastCheckIn || ((new Date().time) - state.lastCheckIn > checkInIntervalMS)) 
 }
 
-// private sendResponse(cmds) {
-	// def actions = []
-	// cmds?.each { cmd ->
-		// actions << new hubitat.device.HubAction(cmd)
-	// }	
-	// sendHubCommand(actions)
-	// return []
+// def ping() {
+	// logTrace "ping()"	
+	// return refresh()
 // }
-
-def ping() {
-	logTrace "ping()"	
-	return refresh()
-}
 
 def refresh() {
 	logTrace "refresh()"
@@ -340,5 +307,5 @@ private logDebug(msg) {
 }
 
 private logTrace(msg) {
-	 // log.trace "$msg"
+	// log.trace "$msg"
 }
