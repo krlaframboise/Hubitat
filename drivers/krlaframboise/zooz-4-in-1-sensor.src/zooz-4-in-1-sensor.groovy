@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Zooz 4-in-1 Sensor v1.0.1
+ *  HUBITAT: Zooz 4-in-1 Sensor v1.0.2
  *		(Model: ZSE40)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    1.0.1 (02/15/2018)
+ *    1.0.2 (02/18/2018)
  *    	- Initial Release
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,7 @@
  */
 
 private getDriverDetails() { 
-	return "<br>Zooz 4-in-1 Sensor<br>Version 1.0.1<br>Supported Devices: ZSE40"
+	return "<br>Zooz 4-in-1 Sensor<br>Version 1.0.2<br>Supported Devices: ZSE40"
 }
  
 metadata {
@@ -32,7 +32,6 @@ metadata {
 		author: "Kevin LaFramboise"
 	) {
 		capability "Sensor"
-		capability "Configuration"
 		capability "Motion Sensor"
 		capability "Illuminance Measurement"
 		capability "Relative Humidity Measurement"
@@ -40,7 +39,8 @@ metadata {
 		capability "Battery"
 		capability "Tamper Alert"
 		capability "Refresh"
-		capability "Health Check"
+		// capability "Configuration"		
+		// capability "Health Check"
 		
 		attribute "lastCheckin", "string"
 		attribute "lastUpdate", "string"
@@ -74,20 +74,20 @@ metadata {
 
 		getParamInput(tempScaleParam)
 		getParamInput(tempTriggerParam)
-		getNumberInput("tempOffset", "Temperature Offset [-25 to 25]\n(0 = No Offset)\n(-1 = Subtract 1°)\n(1 = Add 1°)", "-25..25", tempOffsetSetting)
+		getNumberInput("tempOffset", "Temperature Offset [-25 to 25]<br>(0 = No Offset)<br>(-1 = Subtract 1°)<br>(1 = Add 1°)", "-25..25", tempOffsetSetting)
 		getParamInput(humidityTriggerParam)	
-		getNumberInput("humidityOffset", "Humidity % Offset [-25 to 25]\n(0 = No Offset)\n(-1 = Subtract 1%)\n(1 = Add 1%)", "-25..25", humidityOffsetSetting)
+		getNumberInput("humidityOffset", "Humidity % Offset [-25 to 25]<br>(0 = No Offset)<br>(-1 = Subtract 1%)<br>(1 = Add 1%)", "-25..25", humidityOffsetSetting)
 		getParamInput(lightTriggerParam)
-		getNumberInput("lightOffset", "Light % Offset [-25 to 25]\n(0 = No Offset)\n(-1 = Subtract 1%)\n(1 = Add 1%)", "-25..25", lightOffsetSetting)
-		getNumberInput("lxLightOffset", "Light Lux Offset [-25 to 25]\n(0 = No Offset)\n(-1 = Subtract 1 lx)\n(1 = Add 1 lx)", "-25..25", lxLightOffsetSetting)
-		getBoolInput("reportLx", "Report Illuminance as Lux?\n(When enabled, a calculated lux level will be used for illuminance instead of the default %.)", reportLxSetting)
+		getNumberInput("lightOffset", "Light % Offset [-25 to 25]<br>(0 = No Offset)<br>(-1 = Subtract 1%)<br>(1 = Add 1%)", "-25..25", lightOffsetSetting)
+		getNumberInput("lxLightOffset", "Light Lux Offset [-25 to 25]<br>(0 = No Offset)<br>(-1 = Subtract 1 lx)<br>(1 = Add 1 lx)", "-25..25", lxLightOffsetSetting)
+		getBoolInput("reportLx", "Report Illuminance as Lux?<br>(When enabled, a calculated lux level will be used for illuminance instead of the default %.)", reportLxSetting)
 		getNumberInput("maxLx", "Lux value to report when light level is at 100%:", "0..5000", maxLxSetting)
 		getParamInput(motionTimeParam)
 		getParamInput(motionSensitivityParam)
 		getParamInput(ledIndicatorModeParam)
-		getNumberInput("checkinInterval", "Minimum Check-in Interval [0-167]\n(0 = 10 Minutes [FOR TESTING ONLY])\n(1 = 1 Hour)\n(167 = 7 Days)", "0..167", checkinIntervalSetting)
-		getNumberInput("reportBatteryEvery", "Battery Reporting Interval [1-167]\n(1 = 1 Hour)\n(167 = 7 Days)\nThis setting can't be less than the Minimum Check-in Interval.", "1..67", batteryReportingIntervalSetting)
-		getBoolInput("autoClearTamper", "Automatically Clear Tamper?\n(The tamper detected event is raised when the device is opened.  This setting allows you to decide whether or not to have the clear event automatically raised when the device closes.)", false)
+		getNumberInput("checkinInterval", "Minimum Check-in Interval [0-167]<br>(0 = 10 Minutes [FOR TESTING ONLY])<br>(1 = 1 Hour)<br>(167 = 7 Days)", "0..167", checkinIntervalSetting)
+		getNumberInput("reportBatteryEvery", "Battery Reporting Interval [1-167]<br>(1 = 1 Hour)<br>(167 = 7 Days)<br>This setting can't be less than the Minimum Check-in Interval.", "1..167", batteryReportingIntervalSetting)
+		getBoolInput("autoClearTamper", "Automatically Clear Tamper?<br>(The tamper detected event is raised when the device is opened.  This setting allows you to decide whether or not to have the clear event automatically raised when the device closes.)", false)
 		getBoolInput("debugOutput", "Enable debug logging?", true)
 	}	
 }
@@ -119,6 +119,7 @@ private getParamInput(param) {
 def installed() {
 	logTrace "installed()"
 	updateDriverDetails()
+	return []
 }
 
 def updated() {	
@@ -135,6 +136,7 @@ def updated() {
 	}
 	
 	updateDriverDetails()
+	return []
 }
 
 private updateDriverDetails() {
@@ -150,9 +152,11 @@ private checkForPendingChanges() {
 			changes += 1
 		}
 	}
-	// if (checkinIntervalChanged) {
-		// changes += 1
-	// }
+	
+	if (checkinIntervalChanged) {
+		changes += 1
+	}
+	
 	if (changes != getAttrValue("pendingChanges")) {
 		sendEvent(createEventMap("pendingChanges", changes, "", false))
 	}
@@ -200,8 +204,8 @@ def configure() {
 	
 	def cmds = []		
 	if (!firmwareVersion) {		
-		sendEvent(name: "primaryStatus", value: "inactive", displayed: false)
-		cmds << "delay 3000"
+		sendEvent(name: "primaryStatus", value: "Save Settings and Wake Up Device.", displayed: false)	
+		cmds << "delay 2000" 
 		cmds << versionGetCmd()
 	}
 		
@@ -217,11 +221,12 @@ def configure() {
 		cmds += updateConfigVal(param)
 	}	
 	
-	if (checkinIntervalChanged) {
+	if (checkinIntervalChanged) {		
+		logDebug "Changing Wake Up Interval to ${checkinIntervalSettingSeconds / 60} Seconds"
 		cmds << wakeUpIntervalSetCmd(checkinIntervalSettingSeconds)
 		cmds << wakeUpIntervalGetCmd()
-	}
-		
+	}	
+	
 	return cmds ? delayBetween(cmds, 500) : []	
 }
 
@@ -274,9 +279,9 @@ private motionTimeMatchesFirmware(val) {
 }
 
 // Required for HealthCheck Capability, but doesn't actually do anything because this device sleeps.
-def ping() {
-	logDebug "ping()"	
-}
+// def ping() {
+	// logDebug "ping()"	
+// }
 
 private refreshSensorData() {
 	logDebug "Refreshing Sensor Data"
@@ -344,7 +349,7 @@ private getDebugOutputSetting() {
 private getNameValueSettingDesc(nameValueMap) {
 	def desc = ""
 	nameValueMap?.sort { it.value }.each { 
-		desc = "${desc}\n(${it.value} = ${it.name})"
+		desc = "${desc}<br>(${it.value} = ${it.name})"
 	}
 	return desc
 }
@@ -419,23 +424,23 @@ private getTempScaleParam() {
 }
 
 private getTempTriggerParam() {
-	return createConfigParamMap(2, "Temperature Change Trigger [1-50]\n(1 = 0.1°)\n(50 = 5.0°)", 1, "tempTrigger", "1..50", 10)
+	return createConfigParamMap(2, "Temperature Change Trigger [1-50]<br>(1 = 0.1°)<br>(50 = 5.0°)", 1, "tempTrigger", "1..50", 10)
 }
 
 private getHumidityTriggerParam() {
-	return createConfigParamMap(3, "Humidity Change Trigger [1-50]\n(1% - 50%)", 1, "humidityTrigger", "1..50", 10)
+	return createConfigParamMap(3, "Humidity Change Trigger [1-50]<br>(1% - 50%)", 1, "humidityTrigger", "1..50", 10)
 }
 
 private getLightTriggerParam() {
-	return createConfigParamMap(4, "Light Change Trigger [5-50]\n(5% - 50%)", 1, "lightTrigger", "5..50", 10)
+	return createConfigParamMap(4, "Light Change Trigger [5-50]<br>(5% - 50%)", 1, "lightTrigger", "5..50", 10)
 }
 
 private getMotionTimeParam() {	
-	return createConfigParamMap(5, "Motion Retrigger Time [1-255 or 15-60]\n(1 Minute - 255 Minutes [FIRMWARE ${firmwareV1} & ${firmwareV2}])\n(15 Seconds - 60 Seconds [FIRMWARE ${firmwareV3}])", 1, "motionTime", "1..255", 15)
+	return createConfigParamMap(5, "Motion Retrigger Time [1-255 or 15-60]<br>(1 Minute - 255 Minutes [FIRMWARE ${firmwareV1} & ${firmwareV2}])<br>(15 Seconds - 60 Seconds [FIRMWARE ${firmwareV3}])", 1, "motionTime", "1..255", 15)
 }
 
 private getMotionSensitivityParam() {
-	return createConfigParamMap(6, "Motion Sensitivity [1-7]\n(1 = Most Sensitive)\n(7 = Least Sensitive)", 1, "motionSensitivity", "1..7", 4)
+	return createConfigParamMap(6, "Motion Sensitivity [1-7]<br>(1 = Most Sensitive)<br>(7 = Least Sensitive)", 1, "motionSensitivity", "1..7", 4)
 }
 
 private getLedIndicatorModeParam() {	
@@ -461,10 +466,10 @@ private createConfigParamMap(num, name, size, prefName, range, val) {
 	]
 }
 
-def parse(String description) {
+def parse(String description) {	
 	def result = []
 	def cmd = zwave.parse(description, commandClassVersions)
-	if (cmd) {
+	if (cmd) {		
 		result += zwaveEvent(cmd)
 	}
 	else {
@@ -477,7 +482,7 @@ def parse(String description) {
 }
 
 def zwaveEvent(hubitat.zwave.commands.securityv1.SecurityMessageEncapsulation cmd) {
-	def encapCmd = cmd.encapsulatedCommand(getCommandClassVersions())
+	def encapCmd = cmd.encapsulatedCommand(commandClassVersions)
 		
 	def result = []
 	if (encapCmd) {
@@ -510,6 +515,7 @@ private getCommandClassVersions() {
 }
 
 def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpIntervalReport cmd) {
+	logTrace "WakeUpIntervalReport $cmd"
 	state.checkinInterval = cmd.seconds
 	
 	sendUpdatingEvent()
@@ -523,11 +529,11 @@ def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpIntervalReport cmd) {
 	}
 	
 	// Set the Health Check interval so that it reports offline 5 minutes after it's missed 2 checkins.
-	def val = ((cmd.seconds * 2) + (5 * 60))
+	// def val = ((cmd.seconds * 2) + (5 * 60))
 	
-	def eventMap = createEventMap("checkInterval", val, "", false)
+	// def eventMap = createEventMap("checkInterval", val, "", false)
 
-	eventMap.data = [protocol: "zwave", hubHardwareId: device.hub.hardwareID]
+	// eventMap.data = [protocol: "zwave", hubHardwareId: device.hub.hardwareID]
 	
 	runIn(5, finalizeConfiguration)
 	
@@ -539,6 +545,11 @@ def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpNotification cmd) {
 	def cmds = []
 		
 	cmds += configure()
+	
+	if (cmds) {
+		// Required for last report to get sent back.
+		cmds << "delay 2000"
+	}
 	
 	cmds << wakeUpNoMoreInfoCmd()
 	return response(cmds)
@@ -580,7 +591,7 @@ def zwaveEvent(hubitat.zwave.commands.manufacturerspecificv2.ManufacturerSpecifi
 }
 
 def zwaveEvent(hubitat.zwave.commands.versionv1.VersionReport cmd) {
-	// logTrace "VersionReport: ${cmd}"
+	logTrace "VersionReport: ${cmd}"
 	
 	def version = "${cmd.applicationVersion}.${cmd.applicationSubVersion}"
 	
