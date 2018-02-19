@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Dome Motion Sensor v0.0.1
+ *  HUBITAT: Dome Motion Sensor v0.0.2
  *  (Model: DMMS1)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    0.0.1 (02/17/2018)
+ *    0.0.2 (02/19/2018)
  *      - Beta Release
  *
  *
@@ -23,7 +23,7 @@
  */
  
 private getDriverDetails() { 
-	return "<br>Dome Motion Sensor<br>Version 0.0.1<br>Supported Devices: DMMS1"
+	return "<br>Dome Motion Sensor<br>Version 0.0.2<br>Supported Devices: DMMS1"
 }
  
 metadata {
@@ -36,15 +36,13 @@ metadata {
 		capability "Motion Sensor"
 		capability "Illuminance Measurement"
 		capability "Battery"
-		capability "Configuration"
 		capability "Refresh"
-		capability "Health Check"
+		// capability "Health Check"
+		// capability "Configuration"
 		
 		attribute "lastCheckin", "string"
 		
-		fingerprint deviceId: "0x0701", inClusters: "0x30, 0x31, 0x59, 0x5A, 0x5E, 0x70, 0x71, 0x72, 0x73, 0x80, 0x84, 0x85, 0x86"
-		
-		fingerprint mfr:"021F", prod:"0003", model:"0083"
+		fingerprint deviceId: "0083", inClusters: "0x5E,0x86,0x72,0x5A,0x73,0x80,0x31,0x71,0x30,0x70,0x85,0x59,0x84", outClusters: "", mfr:"021F", prod:"0003", deviceJoinName: "Dome Motion Sensor"		
 	}
 	
 	preferences {
@@ -167,17 +165,17 @@ private updateConfigVal(paramNum, paramSize, val, refreshAll) {
 	return result
 }
 
-private initializeCheckin() {
-	// Set the Health Check interval so that it can be skipped once plus 2 minutes.
-	def checkInterval = ((checkinIntervalSettingMinutes * 2 * 60) + (2 * 60))
+// private initializeCheckin() {
+	// // Set the Health Check interval so that it can be skipped once plus 2 minutes.
+	// def checkInterval = ((checkinIntervalSettingMinutes * 2 * 60) + (2 * 60))
 	
-	sendEvent(name: "checkInterval", value: checkInterval, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
-}
+	// sendEvent(name: "checkInterval", value: checkInterval, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
+// }
 
 // Required for HealthCheck Capability, but doesn't actually do anything because this device sleeps.
-def ping() {
-	logDebug("ping()")
-}
+// def ping() {
+	// logDebug("ping()")
+// }
 
 // Forces the configuration to be resent to the device the next time it wakes up.
 def refresh() {	
@@ -232,7 +230,7 @@ def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpNotification cmd)
 def zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpIntervalReport cmd) {
 	logTrace("WakeUpIntervalReport: $cmd")
 	state.checkinInterval = cmd.seconds
-	initializeCheckin()
+	// initializeCheckin()
 	return [ ]
 }
 
