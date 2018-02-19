@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Dome Leak Sensor v0.0
+ *  HUBITAT: Dome Leak Sensor v0.0.1
  *  (Model: DMWS1)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    0.0 (02/13/2018)
+ *    0.0.1 (02/19/2018)
  *      - Beta Release
  *
  *
@@ -21,6 +21,11 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+private getDriverDetails() { 
+	return "<br>Dome Leak Sensor<br>Version 0.0.1<br>Supported Devices: DMWS1"
+}
+ 
 metadata {
 	definition (
 		name: "Dome Leak Sensor", 
@@ -29,18 +34,16 @@ metadata {
 	) {
 		capability "Sensor"
 		capability "Water Sensor"
-		capability "Battery"
-		capability "Configuration"
+		capability "Battery"	
 		capability "Refresh"
-		capability "Health Check"		
+		// capability "Health Check"
+		// capability "Configuration"
 
 		attribute "lastCheckin", "string"
 				
-		fingerprint deviceId: "0085", inClusters: "0x5E,0x86,0x72,0x5A,0x73,0x80,0x71,0x30,0x85,0x59,0x84,0x70", outClusters: "", mfr:"021F", prod:"0003", deviceJoinName: "Dome Leak Sensor"	
+		fingerprint deviceId: "0085", inClusters: "0x5E,0x86,0x72,0x5A,0x73,0x80,0x71,0x30,0x85,0x59,0x84,0x70", outClusters: "", mfr:"021F", prod:"0003", deviceJoinName: "Dome Leak Sensor"			
 	}
-	
-	simulator { }
-	
+		
 	preferences {
 		input "audibleAlarmEnabled", "enum",
 			title: "Enable/Disable Audible Alarm:",
@@ -89,44 +92,27 @@ metadata {
 			defaultValue: true, 
 			required: false
 	}
+}
 
-	tiles(scale: 2) {
-		multiAttributeTile(name:"water", type: "generic", width: 6, height: 4, canChangeIcon: false){
-			tileAttribute ("device.water", key: "PRIMARY_CONTROL") {
-				attributeState "dry", 
-					label:'Dry', 
-					icon: "st.alarm.water.dry",
-					backgroundColor:"#ffffff"
-				attributeState "wet", 
-					label:'Wet', 
-					icon:"st.alarm.water.wet", 
-					backgroundColor:"#00a0dc"
-			}			
-		}	
-		
-		standardTile("refresh", "device.refresh", width: 2, height: 2) {
-			state "refresh", label:'Refresh', action: "refresh", icon:"st.secondary.refresh-icon"
-		}
-		
-		valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2){
-			state "battery", label:'${currentValue}% battery', unit:""
-		}
-					
-		main "water"
-		details(["water", "refresh", "battery"])
-	}
+def installed() {
+	logTrace "installed()"
+	updateDriverDetails()
 }
 
 // Sets flag so that configuration is updated the next time it wakes up.
-def updated() {	
-	// This method always gets called twice when preferences are saved.
-	// if (!isDuplicateCommand(state.lastUpdated, 3000)) {		
-		// state.lastUpdated = new Date().time
-		logTrace "updated()"
+def updated() {		
+	logTrace "updated()"
 
-		logForceWakeupMessage "The configuration will be updated the next time the device wakes up."
-		state.pendingChanges = true
-	// }		
+	logForceWakeupMessage "The configuration will be updated the next time the device wakes up."
+	state.pendingChanges = true
+
+	updateDriverDetails()
+}
+
+private updateDriverDetails() {
+	if (driverDetails != getDataValue("driverDetails")) {
+		updateDataValue("driverDetails", driverDetails)
+	}
 }
 
 // Initializes the device state when paired and updates the device's configuration.
@@ -149,7 +135,7 @@ def configure() {
 		cmds << batteryGetCmd()
 	}
 	
-	initializeCheckin()
+	// initializeCheckin()
 	cmds << wakeUpIntervalSetCmd(checkinIntervalSettingMinutes)
 		
 	if (cmds) {
@@ -172,17 +158,17 @@ private updateConfigVal(paramNum, val, refreshAll) {
 	return result
 }
 
-private initializeCheckin() {
-	// Set the Health Check interval so that it can be skipped once plus 2 minutes.
-	def checkInterval = ((checkinIntervalSettingMinutes * 2 * 60) + (2 * 60))
+// private initializeCheckin() {
+	// // Set the Health Check interval so that it can be skipped once plus 2 minutes.
+	// def checkInterval = ((checkinIntervalSettingMinutes * 2 * 60) + (2 * 60))
 	
-	sendEvent(name: "checkInterval", value: checkInterval, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
-}
+	// sendEvent(name: "checkInterval", value: checkInterval, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
+// }
 
 // Required for HealthCheck Capability, but doesn't actually do anything because this device sleeps.
-def ping() {
-	logDebug "ping()"	
-}
+// def ping() {
+	// logDebug "ping()"	
+// }
 
 // Forces the configuration to be resent to the device the next time it wakes up.
 def refresh() {	
