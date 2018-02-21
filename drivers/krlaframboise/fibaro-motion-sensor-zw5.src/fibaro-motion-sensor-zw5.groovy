@@ -10,6 +10,7 @@
  *    1.0.0 (02/20/2018)
  *      - Initial Release
  *
+ *	If you like the apps and drivers I've created and you would like to make a donation, please go to https://www.paypal.me/krlaframboise
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
