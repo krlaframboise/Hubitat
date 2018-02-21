@@ -1,5 +1,5 @@
 /**
- *  Fibaro Motion Sensor v1.0.0
+ *  HUBITAT: Fibaro Motion Sensor v1.0.0
  *  (Model: FGMS-001 ZW5)
  *
  *  Author: 
