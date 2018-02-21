@@ -1,5 +1,5 @@
 /**
- *  Dome Mouser v0.0.0
+ *  HUBITAT: Dome Mouser v0.0.0
  *  (Model: DMMZ1)
  *
  *  Author: 
