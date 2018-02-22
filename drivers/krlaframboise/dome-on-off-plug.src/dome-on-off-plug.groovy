@@ -1,5 +1,5 @@
 /**
- *  HUBITAT: Dome On Off Plug v0.0.0
+ *  HUBITAT: Dome On Off Plug v0.0.1
  *  (Model: DMOF1)
  *
  *  Author: 
@@ -7,7 +7,7 @@
  *
  *  Changelog:
  *
- *    0.0.0 (02/20/2018)
+ *    0.0.1 (02/21/2018)
  *    	- Beta Release
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,7 @@
  */
 
 private getDriverDetails() { 
-	return "<br>Dome On Off Plug<br>Version 0.0.0<br>Supported Devices: DMOF1"
+	return "<br>Dome On Off Plug<br>Version 0.0.1<br>Supported Devices: DMOF1"
 } 
 
 metadata {
@@ -160,7 +160,9 @@ def updated() {
 	
 	updateDriverDetails()
 	
-	return [configure(), "delay 2000"]
+	def cmds = configure()
+	cmds << "delay 2000"
+	return cmds
 }
 
 private updateDriverDetails() {
