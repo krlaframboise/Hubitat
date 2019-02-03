@@ -1,5 +1,5 @@
 /**
- *  Zooz Double Plug Advanced v1.0
+ *  Zooz Double Plug Advanced v1.1
  *  (Models: ZEN25)
  *
  *  Author: 
@@ -8,6 +8,9 @@
  *	Documentation:
  *
  *  Changelog:
+ *
+ *    1.1 (02/03/2019)
+ *      - Fixed power reporting threshold options
  *
  *    1.0 (12/21/2018)
  *      - Initial Release
@@ -774,15 +777,9 @@ private getOverloadOptions() {
 
 private getPowerReportingThresholdOptions() {
 	def options = [0:"Disabled"]
-	options += powerOptions
-	return options
-}
-
-private getPowerOptions() {
-	def options = [:]
-	(1..10).each {
-		options["${it}"] = "${it} A"
-	}		
+	[1,2,3,4,5,10,25,50,75,100,150,200,250,300,400,500,750,1000,1250,1500,1750,2000,2500,3000,3500,4000,4500,5000].each {
+		options["${it}"] = "${it} W"
+	}
 	return options
 }
 
