@@ -259,10 +259,10 @@ def thresholdsPage() {
 				required: false,
 				defaultValue: "days",
 				options: ["seconds", "minutes", "hours", "days"]
-			input "lastEventThresholdOverride", "bool",
-				title: "Override Last Event Threshold for Offline Devices?",
-				required: false,
-				defaultValue: false
+			// input "lastEventThresholdOverride", "bool",
+				// title: "Override Last Event Threshold for Offline Devices?",
+				// required: false,
+				// defaultValue: false
 		}
 	}
 }
@@ -273,7 +273,7 @@ def notificationsPage() {
 		section ("Notification Settings") {
 			paragraph "When notifications are enabled, notifications will be sent when the device value goes above or below the threshold specified in the Threshold Settings."				
 			
-			input "pushDevices", "capability.notification", title: "Send Push Notifications?", multiple: true, required: false			
+			input "pushDevices", "capability.notification", title: "Send notification to device(s)?", multiple: true, required: false			
 			input "phone", "phone", title: "Phone number for SMS format +1<10 digits> (separate multiple with , )", required: false, submitOnChange: true
 			input "modes", "mode", title: "Only send Notifications for specific mode(s)", multiple: true, required: false 			
 			input "maxNotifications", "number",
@@ -389,10 +389,10 @@ def otherSettingsPage() {
 				title: "Display Device State Icons?",
 				defaultValue: true,
 				required: false
-			input "condensedViewEnabled", "bool",
-				title: "Condensed View Enabled?",
-				defaultValue: false,
-				required: false				
+			// input "condensedViewEnabled", "bool",
+				// title: "Condensed View Enabled?",
+				// defaultValue: false,
+				// required: false				
 		}
 		section ("Sorting") {
 			input "batterySortByValue", "bool",
@@ -408,22 +408,22 @@ def otherSettingsPage() {
 				defaultValue: true,
 				required: false			
 		}	
-		section ("Last Event Accuracy") {
-			input "checkHistoryThreshold", "number",
-				title: "Check History Threshold: (Hours)\n(This SmartApp uses the device's last activity field, but this setting allows you to specify the number of hours the last activity has to be behind before manually retrieving the last event from the device history.)",
-				defaultValue: 12,
-				range: "1..168",
-				required: false
-			input "lastEventAccuracy", "number",
-				title: "Accuracy Level (1-25)\n(Setting this to a higher number will improve the accuracy for devices that generate a lot of events, but if you're seeing timeout errors in Live Logging, you should set this to a lower number.)",
-				defaultValue: 8,
-				range: "1..25",
-				required: false		
-			input "lastEventByStateEnabled", "bool",
-				title: "Advanced Last Event Check Enabled?\n(When enabled, the devices events and state changes are used to determine the most recent activity.)",
-				defaultValue: true,
-				required: false
-		}
+		// section ("Last Event Accuracy") {
+			// input "checkHistoryThreshold", "number",
+				// title: "Check History Threshold: (Hours)\n(This SmartApp uses the device's last activity field, but this setting allows you to specify the number of hours the last activity has to be behind before manually retrieving the last event from the device history.)",
+				// defaultValue: 12,
+				// range: "1..168",
+				// required: false
+			// input "lastEventAccuracy", "number",
+				// title: "Accuracy Level (1-25)\n(Setting this to a higher number will improve the accuracy for devices that generate a lot of events, but if you're seeing timeout errors in Live Logging, you should set this to a lower number.)",
+				// defaultValue: 8,
+				// range: "1..25",
+				// required: false		
+			// input "lastEventByStateEnabled", "bool",
+				// title: "Advanced Last Event Check Enabled?\n(When enabled, the devices events and state changes are used to determine the most recent activity.)",
+				// defaultValue: true,
+				// required: false
+		// }
 		section ("Logging") {
 			input "logging", "enum",
 				title: "Types of messages to log:",
@@ -469,10 +469,10 @@ def dashboardSettingsPage() {
 					defaultValue: "Normal",
 					required: false,
 					options: ["Normal", "Condensed - 1 Column", "Condensed - 2 Column", "Condensed - 3 Column"]
-				input "displayOnlineOfflineStatus", "bool",
-					title: "Display Online/Offline Status:",
-					defaultValue: false,
-					required: false
+				// input "displayOnlineOfflineStatus", "bool",
+					// title: "Display Online/Offline Status:",
+					// defaultValue: false,
+					// required: false
 				input "customCSS", "text",
 					title:"Enter CSS rules that should be appended to the dashboard's CSS file.",
 					required: false
@@ -527,7 +527,7 @@ private enableDashboardPage() {
 				paragraph "The Dashboard is now enabled. Tap Done to continue"
 			} 
 			else {
-				paragraph "Please go to your SmartThings IDE, select the My SmartApps section, click the 'Edit Properties' button of the Simple Device Viewer app, open the OAuth section and click the 'Enable OAuth in Smart App' button. Click the Update button to finish.\n\nOnce finished, tap Done and try again.", title: "Please enable OAuth for Simple Device Viewer", required: true, state: null
+				paragraph "Please open the Simple Device Viewer in the Apps Code section, click the 'OAuth', click the 'Enable OAuth' button, and then click the 'Update' button.\n\nOnce finished, tap Done and try again.", title: "Please enable OAuth for Simple Device Viewer", required: true, state: null
 			}
 		}
 	}
@@ -542,7 +542,7 @@ def lastEventPage() {
 			href(
 				name: "refreshLastEventLink", 
 				title: "Refresh Data",
-				description: "${getRefreshLastEventLinkDescription()}",
+				// description: "${getRefreshLastEventLinkDescription()}",
 				page: "refreshLastEventPage",
 				required: false
 			)
@@ -556,16 +556,17 @@ def lastEventPage() {
 	}
 }
 
-private getRefreshLastEventLinkDescription() {
-	def stateRefreshed = (state.stateCachedTime) ? getTimeSinceLastActivity(new Date().time - state.stateCachedTime) : "?"
-	def eventsRefreshed = (state.eventCachedTime) ? getTimeSinceLastActivity(new Date().time - state.eventCachedTime) : "?"
-	return "Events refreshed ${eventsRefreshed.toLowerCase()} ago.\nState refreshed ${stateRefreshed.toLowerCase()} ago."
-}
+// private getRefreshLastEventLinkDescription() {
+	// def stateRefreshed = (state.stateCachedTime) ? getTimeSinceLastActivity(new Date().time - state.stateCachedTime) : "?"
+	// def eventsRefreshed = (state.eventCachedTime) ? getTimeSinceLastActivity(new Date().time - state.eventCachedTime) : "?"
+	// return "Events refreshed ${eventsRefreshed.toLowerCase()} ago.\nState refreshed ${stateRefreshed.toLowerCase()} ago."
+// }
 
 def refreshLastEventPage() {
 	dynamicPage(name:"refreshLastEventPage") {		
 		section () {
-			refreshDeviceActivityCache()
+			cleanState()
+			// refreshDeviceActivityCache()
 			paragraph "Started refreshing last events, but this process could take up to a minute."
 		}		
 	}
@@ -605,7 +606,7 @@ private toggleSwitch(device, newState) {
 // Lists all devices and all the state of all their capabilities
 def capabilityPage(params) {
 	dynamicPage(name:"capabilityPage") {	
-		def capSetting = params.capabilitySetting ? params.capabilitySetting : state.lastCapabilitySetting
+		def capSetting = params?.capabilitySetting ? params.capabilitySetting : state.lastCapabilitySetting
 		
 		if (capSetting) {
 			state.lastCapabilitySetting = capSetting
@@ -675,13 +676,13 @@ private getSwitchToggleLinks(listItems) {
 
 private getParagraphs(listItems) {
 	listItems.sort { it.sortValue }
-	if (!condensedViewEnabled) {
-		return listItems.unique().each { 
-			it.image = it.image ? it.image : ""
-			paragraph image: "${it.image}",	"${it.title}"
-		}
-	}
-	else {
+	// if (!condensedViewEnabled) {
+		// return listItems.unique().each { 
+			// it.image = it.image ? it.image : ""
+			// paragraph image: "${it.image}",	"${it.title}"
+		// }
+	// }
+	// else {
 		def content = null
 		listItems.unique().each { 
 			content = content ? content.concat("\n${it.title}") : "${it.title}"
@@ -689,7 +690,7 @@ private getParagraphs(listItems) {
 		if (content) {
 			paragraph "$content"
 		}
-	}
+	// }
 }
 
 private getCapabilityPageLink(cap) {
@@ -750,12 +751,12 @@ private deviceMatchesSharedCapability(device, cap) {
 private getDeviceCapabilityListItem(device, cap) {
 	def listItem = getDeviceCapabilityStatusItem(device, cap)
 	listItem.deviceId = "${device.id}"
-	if (listItem.image && cap.imageOnly && !condensedViewEnabled) {
-		listItem.title = "${device.displayName}"
-	}
-	else {
+	// if (listItem.image && cap.imageOnly && !condensedViewEnabled) {
+		// listItem.title = "${device.displayName}"
+	// }
+	// else {
 		listItem.title = "${getDeviceStatusTitle(device, listItem.status)}"
-	}
+	// }
 	listItem
 }
 
@@ -779,7 +780,7 @@ private getAllDeviceLastEventListItems() {
 
 private getDeviceLastEventListItem(device) {
 	def now = new Date().time
-	def lastActivity = getDeviceLastActivity(device)
+	def lastActivity = device?.getLastActivity() //getDeviceLastActivity(device)
 	def lastEventTime = lastActivity?.time ?: 0
 	
 	def listItem = [
@@ -794,79 +795,79 @@ private getDeviceLastEventListItem(device) {
 	return listItem
 }
 
-private getDeviceLastActivity(device) {
-	def activity = getDeviceCache(device.deviceNetworkId)?.activity
-	if (activity?.size()) {
-		return activity.sort { it.time }.last()
-	}
-}
+// private getDeviceLastActivity(device) {
+	// def activity = getDeviceCache(device.deviceNetworkId)?.activity
+	// if (activity?.size()) {
+		// return activity.sort { it.time }.last()
+	// }	
+// }
 
 /*There's currently a bug that limits the number
 of events returned to 50 so this method loops
 through the list until it finds one that has 
 a source containing "DEVICE".*/
-private getDeviceLastDeviceEvent(device) {
-	def totalLoops = safeToInteger(settings.lastEventAccuracy, 1)
-	def startDate = new Date() - 7
-	def endDate = new Date()
-	def lastEvent
+// private getDeviceLastDeviceEvent(device) {
+	// def totalLoops = safeToInteger(settings.lastEventAccuracy, 1)
+	// def startDate = new Date() - 7
+	// def endDate = new Date()
+	// def lastEvent
 	
-	totalLoops = (totalLoops > 3) ? 3 : totalLoops  // Limit to 3 due to event timeout problem.
+	// totalLoops = (totalLoops > 3) ? 3 : totalLoops  // Limit to 3 due to event timeout problem.
 	
-	for (int index= 0; index < totalLoops; index++) {
-		def events = device.eventsBetween(startDate, endDate, [max:50]).flatten()
+	// for (int index= 0; index < totalLoops; index++) {
+		// def events = device.eventsBetween(startDate, endDate, [max:50]).flatten()
 		
-		if (events) {			
-			lastEvent = events?.find { "${it.source}".startsWith("DEVICE") }
+		// if (events) {			
+			// lastEvent = events?.find { "${it.source}".startsWith("DEVICE") }
 		
-			if (lastEvent?.date?.time) {
-				// Found an event with the correct source so stop checking.
-				index = totalLoops
-			}
-			else {
-				// Haven't found an event with the correct so move the
-				// end date so the next 50 events will be retrieved.
-				endDate = events.last()?.date
-			}
-		}
-		else {
-			// Checked all the events so stop checking.
-			index = totalLoops
-		}
-	}
-	if (lastEvent) {		
-		return [
-			name: lastEvent.name,
-			value: lastEvent.value,			
-			time: lastEvent.date.time,
-			type: "event"
-		]
-	}
-}
+			// if (lastEvent?.date?.time) {
+				// // Found an event with the correct source so stop checking.
+				// index = totalLoops
+			// }
+			// else {
+				// // Haven't found an event with the correct so move the
+				// // end date so the next 50 events will be retrieved.
+				// endDate = events.last()?.date
+			// }
+		// }
+		// else {
+			// // Checked all the events so stop checking.
+			// index = totalLoops
+		// }
+	// }
+	// if (lastEvent) {		
+		// return [
+			// name: lastEvent.name,
+			// value: lastEvent.value,			
+			// time: lastEvent.date.time,
+			// type: "event"
+		// ]
+	// }
+// }
 
-private getDeviceLastStateChange(device) {
-	if (settings.lastEventByStateEnabled != false) {
+// private getDeviceLastStateChange(device) {
+	// if (settings.lastEventByStateEnabled != false) {
 		
-		def lastState
-		device.supportedAttributes.each {
-			def attributeState = device.currentState("$it")
-			if (attributeState) {
-				if (!lastState || lastState.date.time < attributeState.date.time) {
-					lastState = attributeState
-				}
-			}
-		}
+		// def lastState
+		// device.supportedAttributes.each {
+			// def attributeState = device.currentState("$it")
+			// if (attributeState) {
+				// if (!lastState || lastState.date.time < attributeState.date.time) {
+					// lastState = attributeState
+				// }
+			// }
+		// }
 		
-		if (lastState) {
-			return [
-				name: lastState.name,
-				value: lastState.value,
-				time: lastState.date?.time,
-				type: "state"
-			]				
-		}		
-	}	
-}
+		// if (lastState) {
+			// return [
+				// name: lastState.name,
+				// value: lastState.value,
+				// time: lastState.date?.time,
+				// type: "state"
+			// ]				
+		// }		
+	// }	
+// }
 
 private getTimeSinceLastActivity(ms) {
 	if (ms < msSecond()) {
@@ -895,21 +896,22 @@ private String getDeviceStatusTitle(device, status) {
 		status = "N/A"
 	}
 	if (state.refreshingDashboard) {
-		return "${device.displayName}${getOnlineOfflineStatus(device.status)}"
+		// return "${device.displayName}${getOnlineOfflineStatus(device.status)}"
+		return "${device.displayName}"
 	}
 	else {
 		return "${status} -- ${device.displayName}"
 	}	
 }
 
-private getOnlineOfflineStatus(deviceStatus) {
-	if (settings?.displayOnlineOfflineStatus && deviceStatus?.toLowerCase() in ["online", "offline"]) {
-		return " (${deviceStatus.toLowerCase()})"
-	}
-	else {
-		return ""
-	}
-}
+// private getOnlineOfflineStatus(deviceStatus) {
+	// if (settings?.displayOnlineOfflineStatus && deviceStatus?.toLowerCase() in ["online", "offline"]) {
+		// return " (${deviceStatus.toLowerCase()})"
+	// }
+	// else {
+		// return ""
+	// }
+// }
 
 private getDeviceCapabilityStatusItem(device, cap) {
 	try {
@@ -1065,7 +1067,8 @@ private String getLastEventImage(lastEventTime, deviceStatus) {
 
 private boolean lastEventIsOld(lastEventTime, deviceStatus) {	
 	try {
-		if (!lastEventTime || offlineOverride(deviceStatus)) {
+		// if (!lastEventTime || offlineOverride(deviceStatus)) {
+		if (!lastEventTime) {
 			return true
 		}
 		else {
@@ -1077,9 +1080,9 @@ private boolean lastEventIsOld(lastEventTime, deviceStatus) {
 	}
 }
 
-private boolean offlineOverride(deviceStatus) {
-	return (settings?.lastEventThresholdOverride && (deviceStatus?.toLowerCase() == "offline"))
-}
+// private boolean offlineOverride(deviceStatus) {
+	// return (settings?.lastEventThresholdOverride && (deviceStatus?.toLowerCase() == "offline"))
+// }
 
 private String getAccelerationImage(currentState) {
 	def status = (currentState == "active") ? "active" : "inactive"
@@ -1236,28 +1239,28 @@ private initialize() {
 	
 	runEvery5Minutes(performScheduledTasks)
 	
-	initializeDevicesCache()
+	// initializeDevicesCache()
 }
 
 // Starting with version 1.9, the capabilitySettings are
 // no longer stored in state so this cleans up the old data.
 private cleanState() {
 	def sentNotifications = state.sentNotifications
-	def devicesCache = state.devicesCache
+	// def devicesCache = state.devicesCache
 	state.clear()
 	state.sentNotifications = sentNotifications
-	state.devicesCache = devicesCache
+	// state.devicesCache = devicesCache
 }
 
-// Remove cached data for devices no longer selected and
-// add cached data for newly selected devices.
-void initializeDevicesCache() {
-	def dnis = getAllDNIs()
+// // Remove cached data for devices no longer selected and
+// // add cached data for newly selected devices.
+// void initializeDevicesCache() {
+	// def dnis = getAllDNIs()
 	
-	state.devicesCache?.removeAll { cache ->
-		!dnis?.find { dni -> cache.dni == dni }
-	}	
-}
+	// state.devicesCache?.removeAll { cache ->
+		// !dnis?.find { dni -> cache.dni == dni }
+	// }	
+// }
 
 def performScheduledTasks() {
 	state.lastPerformedScheduledTasks = new Date().time
@@ -1265,16 +1268,15 @@ def performScheduledTasks() {
 		checkDevices()		
 	}
 	if (canPollDevices(state.lastDevicePoll)) {
-		runIn(61, refreshDeviceActivityCache)
+		// runIn(61, refreshDeviceActivityCache)
 		pollDevices()
 	}
-	else {
-		refreshDeviceActivityCache()
-	}
+	// else {
+		// refreshDeviceActivityCache()
+	// }
 }
 
 void pollDevices() {
-	log.warn "Polling Devices"
 	logDebug "Polling Devices"
 	state.lastDevicePoll = new Date().time	
 	getDevicesByCapability("Polling", pollingExcluded)*.poll()
@@ -1285,114 +1287,115 @@ private canPollDevices(lastPoll) {
 		timeElapsed((lastPoll ?: 0) + msMinute(safeToInteger(settings.pollingInterval, 5)), true)
 }
 
-void refreshDeviceActivityCache() {
-	runIn(30, refreshDeviceStateCache)
-	refreshDeviceEventCache()		
-}
+// void refreshDeviceActivityCache() {
+	// runIn(30, refreshDeviceStateCache)
+	// refreshDeviceEventCache()		
+// }
 
-void refreshDeviceStateCache() {
-	refreshDeviceActivityTypeCache("state")	
-}
+// void refreshDeviceStateCache() {
+	// refreshDeviceActivityTypeCache("state")	
+// }
 
-void refreshDeviceEventCache() {
-	refreshDeviceActivityTypeCache("event")	
-}
+// void refreshDeviceEventCache() {
+	// refreshDeviceActivityTypeCache("event")	
+// }
 
-void refreshDeviceActivityTypeCache(activityType) {
-	def devices = getAllDevices()
-	def deviceCount = devices?.size()
-	if (deviceCount) {
-		def cachedTime = new Date().time
+// void refreshDeviceActivityTypeCache(activityType) {
+	// def devices = getAllDevices()
+	// def deviceCount = devices?.size()
+	// if (deviceCount) {
+		// def cachedTime = new Date().time
 		
-		def deviceIndex = (safeToInteger(state."${activityType}DeviceIndex", -1))
+		// def deviceIndex = (safeToInteger(state."${activityType}DeviceIndex", -1))
 		
-		def checkHistoryCutoff = (new Date().time - (safeToInteger(settings?.checkHistoryThreshold, 12) * 60 * 60 * 1000))
+		// def checkHistoryCutoff = (new Date().time - (safeToInteger(settings?.checkHistoryThreshold, 12) * 60 * 60 * 1000))
 		
-		for (int i= 0; i < deviceCount; i++) {
+		// for (int i= 0; i < deviceCount; i++) {
 			
-			deviceIndex += 1
-			deviceIndex = (deviceIndex >= deviceCount) ? 0 : deviceIndex
-			def device = devices[deviceIndex]
+			// deviceIndex += 1
+			// deviceIndex = (deviceIndex >= deviceCount) ? 0 : deviceIndex
+			// def device = devices[deviceIndex]
 			
-			def lastActivity
-			def lastActivityDate = device.getLastActivity()
-			if (lastActivityDate && (lastActivityDate.time >= checkHistoryCutoff)) {
-				lastActivity = [
-					name: "unknown",
-					value: "",
-					time: lastActivityDate.time,
-					type: activityType
-				]
-			}
-			else {
-				if (activityType == "event") {
-					if (!lastActivity) {
-						lastActivity = getDeviceLastDeviceEvent(device)
-					}
-				}
-				else {
-					if (!lastActivity) {
-						lastActivity = getDeviceLastStateChange(device)
-					}
-				}
-			}
+			// def lastActivity
+			// def lastActivityDate = device.getLastActivity()
 			
-			if (lastActivity) {
-				lastActivity.cachedTime = cachedTime
-				saveLastActivityToDeviceCache(device.deviceNetworkId, lastActivity)
-			}
+			// // if (lastActivityDate && (lastActivityDate.time >= checkHistoryCutoff)) {
+				// lastActivity = [
+					// name: "unknown",
+					// value: "",
+					// time: lastActivityDate.time,
+					// type: activityType
+				// ]
+			// // }
+			// // else {
+				// // if (activityType == "event") {
+					// // if (!lastActivity) {
+						// // lastActivity = getDeviceLastDeviceEvent(device)
+					// // }
+				// // }
+				// // else {
+					// // if (!lastActivity) {
+						// // lastActivity = getDeviceLastStateChange(device)
+					// // }
+				// // }
+			// // }
 			
-			if (((new Date().time) - cachedTime) > 10000) {
-				logTrace "Aborted refreshing ${activityType} cache after device ${devices[deviceIndex]?.displayName} [${deviceIndex}]. (Refreshed ${i} of the ${deviceCount} devices)"
+			// if (lastActivity) {
+				// lastActivity.cachedTime = cachedTime
+				// saveLastActivityToDeviceCache(device.deviceNetworkId, lastActivity)
+			// }
+			
+			// // if (((new Date().time) - cachedTime) > 10000) {
+				// // logTrace "Aborted refreshing ${activityType} cache after device ${devices[deviceIndex]?.displayName} [${deviceIndex}]. (Refreshed ${i} of the ${deviceCount} devices)"
 				
-				if ((new Date().time - (state.lastPerformedScheduledTasks ?: 0)) < 190000) {
-					// Start the refresh again in 1 minute as long as it won't overlap with the refresh that occurs every 5 minutes.
-					if (activityType == "event") {
-						runIn(61, refreshDeviceEventCache)
-					}
-					else {
-						runIn(61, refreshDeviceStateCache)
-					}
-				}				
-				i = deviceCount
-			}
-		}	
-		state."${activityType}CachedTime" = cachedTime
-		state."${activityType}DeviceIndex" = deviceIndex
-	}	
-}
+				// // if ((new Date().time - (state.lastPerformedScheduledTasks ?: 0)) < 190000) {
+					// // // Start the refresh again in 1 minute as long as it won't overlap with the refresh that occurs every 5 minutes.
+					// // if (activityType == "event") {
+						// // runIn(61, refreshDeviceEventCache)
+					// // }
+					// // else {
+						// // runIn(61, refreshDeviceStateCache)
+					// // }
+				// // }				
+				// // i = deviceCount
+			// // }
+		// }	
+		// state."${activityType}CachedTime" = cachedTime
+		// state."${activityType}DeviceIndex" = deviceIndex
+	// }	
+// }
 
-void saveLastActivityToDeviceCache(dni, lastActivity) {
-	def found = false
-	def activity = getDeviceCache(dni).activity.collect {
-		if (it.type == lastActivity.type) {
-			found = true
-			return (it.time < lastActivity.time) ? lastActivity : it
-		}
-		else {
-			return it
-		}
-	}
+// void saveLastActivityToDeviceCache(dni, lastActivity) {
+	// def found = false
+	// def activity = getDeviceCache(dni).activity.collect {
+		// if (it.type == lastActivity.type) {
+			// found = true
+			// return (it.time < lastActivity.time) ? lastActivity : it
+		// }
+		// else {
+			// return it
+		// }
+	// }
 
-	if (!found) {
-		activity << lastActivity
-	}
+	// if (!found) {
+		// activity << lastActivity
+	// }
 		
-	getDeviceCache(dni).activity = activity
-}
+	// getDeviceCache(dni).activity = activity
+// }
 
-private getDeviceCache(dni) {
-	if (!state.devicesCache) {
-		state.devicesCache = []
-	}
+// private getDeviceCache(dni) {
+	// if (!state.devicesCache) {
+		// state.devicesCache = []
+	// }
 	
-	def deviceCache = state.devicesCache.find { cache -> "$dni" == "${cache.dni}" }
-	if (!deviceCache) {
-		deviceCache = [dni: "$dni", activity: [ ]]
-		state.devicesCache << deviceCache
-	}
-	return deviceCache
-}
+	// def deviceCache = state.devicesCache.find { cache -> "$dni" == "${cache.dni}" }
+	// if (!deviceCache) {
+		// deviceCache = [dni: "$dni", activity: [ ]]
+		// state.devicesCache << deviceCache
+	// }
+	// return deviceCache
+// }
 
 
 // Generates notifications if device attributes fall outside of specified thresholds and ensures that notifications are spaced at least 5 minutes apart.
@@ -1567,14 +1570,15 @@ def checkLastEvents() {
 		
 		def item = getDeviceLastEventListItem(it)
 
-		def isOld = (item.value > getLastEventThresholdMS() || offlineOverride(it.status))
+		// def isOld = (item.value > getLastEventThresholdMS() || offlineOverride(it.status))
+		def isOld = (item.value > getLastEventThresholdMS())
 		
 		def message = null
 		if (isOld) {
 			message = "Last Event Alert - ${getDeviceStatusTitle(it, item.status)}"
-			if (offlineOverride(it.status)) {
-				message = "${message} (OFFLINE)"
-			}
+			// if (offlineOverride(it.status)) {
+				// message = "${message} (OFFLINE)"
+			// }
 		}
 		   		
 		handleDeviceNotification(it, message, "lastEvent", lastEventNotificationsRepeat)
@@ -1681,11 +1685,14 @@ private boolean canSendNotification(lastSent, repeatMS) {
 private sendNotificationMessage(message) {	
 	if (pushDevices || phone) {
 		state.currentCheckSent = state.currentCheckSent + 1
-		logInfo "Sending $message"
-				
-		if (pushDevices)	pushDevices.deviceNotification(message)
+
+		if (pushDevices)	{
+			logInfo "Sending Notification to '${pushDevices}': ${message}"
+			pushDevices.deviceNotification(message)
+		}
 		
 		if (phone) {
+			logInfo "Sending SMS to '${phone}': ${message}"
 			"${phone}".tokenize(",")?.each {
 				sendSms(it, message)
 			}
