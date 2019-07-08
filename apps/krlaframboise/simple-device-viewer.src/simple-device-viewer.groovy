@@ -1,5 +1,5 @@
 /**
- *  (HUBITAT) Simple Device Viewer v 1.0
+ *  (HUBITAT) Simple Device Viewer v 1.0.1
  *
  *  Author: 
  *    Kevin LaFramboise (krlaframboise)
@@ -9,7 +9,7 @@
  *
  *  Changelog:
  *
- *    1.0 (07/07/2019)
+ *    1.0.1 (07/07/2019)
  *      - Initial Release
  *
  *
@@ -52,7 +52,6 @@ definition(
 	page(name:"mainPage")
   page(name:"capabilityPage")
 	page(name:"lastEventPage")
-	page(name:"refreshLastEventPage")
 	page(name:"toggleSwitchPage")
 	page(name:"devicesPage")
 	page(name:"displaySettingsPage")
@@ -507,13 +506,14 @@ private disableDashboardPage() {
 	dynamicPage(name: "disableDashboardPage", title: "") {
 		section() {
 			if (state.endpoint) {
+				state.endpoint = null
 				try {
-					revokeAccessToken()
+					// Hubitat doesn't support revokeAccessToken, but creating a new token automatically revokes the old token.
+					createAccessToken()  
 				}
 				catch (e) {
 					logDebug "Unable to revoke access token: $e"
-				}
-				state.endpoint = null
+				}				
 			}	
 			paragraph "The Dashboard has been disabled! Tap Done to continue"	
 		}
@@ -539,14 +539,6 @@ private enableDashboardPage() {
 def lastEventPage() {
 	dynamicPage(name:"lastEventPage") {		
 		section ("Time Since Last Event") {
-			href(
-				name: "refreshLastEventLink", 
-				title: "Refresh Data",
-				// description: "${getRefreshLastEventLinkDescription()}",
-				page: "refreshLastEventPage",
-				required: false
-			)
-			
 			def items = getAllDeviceLastEventListItems()?.unique()
 			if (settings.lastEventSortByValue != false) {
 				items?.each { it.sortValue = (it.sortValue * -1) }
@@ -556,17 +548,10 @@ def lastEventPage() {
 	}
 }
 
-// private getRefreshLastEventLinkDescription() {
-	// def stateRefreshed = (state.stateCachedTime) ? getTimeSinceLastActivity(new Date().time - state.stateCachedTime) : "?"
-	// def eventsRefreshed = (state.eventCachedTime) ? getTimeSinceLastActivity(new Date().time - state.eventCachedTime) : "?"
-	// return "Events refreshed ${eventsRefreshed.toLowerCase()} ago.\nState refreshed ${stateRefreshed.toLowerCase()} ago."
-// }
-
 def refreshLastEventPage() {
 	dynamicPage(name:"refreshLastEventPage") {		
 		section () {
 			cleanState()
-			// refreshDeviceActivityCache()
 			paragraph "Started refreshing last events, but this process could take up to a minute."
 		}		
 	}
@@ -676,21 +661,13 @@ private getSwitchToggleLinks(listItems) {
 
 private getParagraphs(listItems) {
 	listItems.sort { it.sortValue }
-	// if (!condensedViewEnabled) {
-		// return listItems.unique().each { 
-			// it.image = it.image ? it.image : ""
-			// paragraph image: "${it.image}",	"${it.title}"
-		// }
-	// }
-	// else {
-		def content = null
-		listItems.unique().each { 
-			content = content ? content.concat("\n${it.title}") : "${it.title}"
-		}
-		if (content) {
-			paragraph "$content"
-		}
-	// }
+	def content = null
+	listItems.unique().each { 
+		content = content ? content.concat("\n${it.title}") : "${it.title}"
+	}
+	if (content) {
+		paragraph "$content"
+	}
 }
 
 private getCapabilityPageLink(cap) {
@@ -751,13 +728,8 @@ private deviceMatchesSharedCapability(device, cap) {
 private getDeviceCapabilityListItem(device, cap) {
 	def listItem = getDeviceCapabilityStatusItem(device, cap)
 	listItem.deviceId = "${device.id}"
-	// if (listItem.image && cap.imageOnly && !condensedViewEnabled) {
-		// listItem.title = "${device.displayName}"
-	// }
-	// else {
-		listItem.title = "${getDeviceStatusTitle(device, listItem.status)}"
-	// }
-	listItem
+	listItem.title = "${getDeviceStatusTitle(device, listItem.status)}"
+	return listItem
 }
 
 private getCapabilitySettingByPrefName(prefName) {
@@ -780,7 +752,7 @@ private getAllDeviceLastEventListItems() {
 
 private getDeviceLastEventListItem(device) {
 	def now = new Date().time
-	def lastActivity = device?.getLastActivity() //getDeviceLastActivity(device)
+	def lastActivity = device?.getLastActivity()
 	def lastEventTime = lastActivity?.time ?: 0
 	
 	def listItem = [
@@ -794,80 +766,6 @@ private getDeviceLastEventListItem(device) {
 	listItem.image = getLastEventImage(lastEventTime, device.status)
 	return listItem
 }
-
-// private getDeviceLastActivity(device) {
-	// def activity = getDeviceCache(device.deviceNetworkId)?.activity
-	// if (activity?.size()) {
-		// return activity.sort { it.time }.last()
-	// }	
-// }
-
-/*There's currently a bug that limits the number
-of events returned to 50 so this method loops
-through the list until it finds one that has 
-a source containing "DEVICE".*/
-// private getDeviceLastDeviceEvent(device) {
-	// def totalLoops = safeToInteger(settings.lastEventAccuracy, 1)
-	// def startDate = new Date() - 7
-	// def endDate = new Date()
-	// def lastEvent
-	
-	// totalLoops = (totalLoops > 3) ? 3 : totalLoops  // Limit to 3 due to event timeout problem.
-	
-	// for (int index= 0; index < totalLoops; index++) {
-		// def events = device.eventsBetween(startDate, endDate, [max:50]).flatten()
-		
-		// if (events) {			
-			// lastEvent = events?.find { "${it.source}".startsWith("DEVICE") }
-		
-			// if (lastEvent?.date?.time) {
-				// // Found an event with the correct source so stop checking.
-				// index = totalLoops
-			// }
-			// else {
-				// // Haven't found an event with the correct so move the
-				// // end date so the next 50 events will be retrieved.
-				// endDate = events.last()?.date
-			// }
-		// }
-		// else {
-			// // Checked all the events so stop checking.
-			// index = totalLoops
-		// }
-	// }
-	// if (lastEvent) {		
-		// return [
-			// name: lastEvent.name,
-			// value: lastEvent.value,			
-			// time: lastEvent.date.time,
-			// type: "event"
-		// ]
-	// }
-// }
-
-// private getDeviceLastStateChange(device) {
-	// if (settings.lastEventByStateEnabled != false) {
-		
-		// def lastState
-		// device.supportedAttributes.each {
-			// def attributeState = device.currentState("$it")
-			// if (attributeState) {
-				// if (!lastState || lastState.date.time < attributeState.date.time) {
-					// lastState = attributeState
-				// }
-			// }
-		// }
-		
-		// if (lastState) {
-			// return [
-				// name: lastState.name,
-				// value: lastState.value,
-				// time: lastState.date?.time,
-				// type: "state"
-			// ]				
-		// }		
-	// }	
-// }
 
 private getTimeSinceLastActivity(ms) {
 	if (ms < msSecond()) {
@@ -896,22 +794,12 @@ private String getDeviceStatusTitle(device, status) {
 		status = "N/A"
 	}
 	if (state.refreshingDashboard) {
-		// return "${device.displayName}${getOnlineOfflineStatus(device.status)}"
 		return "${device.displayName}"
 	}
 	else {
 		return "${status} -- ${device.displayName}"
 	}	
 }
-
-// private getOnlineOfflineStatus(deviceStatus) {
-	// if (settings?.displayOnlineOfflineStatus && deviceStatus?.toLowerCase() in ["online", "offline"]) {
-		// return " (${deviceStatus.toLowerCase()})"
-	// }
-	// else {
-		// return ""
-	// }
-// }
 
 private getDeviceCapabilityStatusItem(device, cap) {
 	try {
@@ -1067,7 +955,6 @@ private String getLastEventImage(lastEventTime, deviceStatus) {
 
 private boolean lastEventIsOld(lastEventTime, deviceStatus) {	
 	try {
-		// if (!lastEventTime || offlineOverride(deviceStatus)) {
 		if (!lastEventTime) {
 			return true
 		}
@@ -1079,10 +966,6 @@ private boolean lastEventIsOld(lastEventTime, deviceStatus) {
 		return true
 	}
 }
-
-// private boolean offlineOverride(deviceStatus) {
-	// return (settings?.lastEventThresholdOverride && (deviceStatus?.toLowerCase() == "offline"))
-// }
 
 private String getAccelerationImage(currentState) {
 	def status = (currentState == "active") ? "active" : "inactive"
@@ -1199,18 +1082,6 @@ private getResourcesUrl() {
 	return url
 }
 
-// Revokes the dashboard access token, if applicable.
-def uninstalled() {
-	if (state.endpoint) {
-		try {
-			logDebug "Revoking dashboard access token"
-			revokeAccessToken()
-		}
-		catch (e) {
-			log.warn "Unable to revoke dashboard access token: $e"
-		}
-	}
-}
 
 // Subscribes to events, starts schedules and initializes all settings.
 def installed() {
@@ -1237,30 +1108,16 @@ private initialize() {
 		state.sentNotifications = []
 	}
 	
-	runEvery5Minutes(performScheduledTasks)
-	
-	// initializeDevicesCache()
+	runEvery5Minutes(performScheduledTasks)	
 }
 
 // Starting with version 1.9, the capabilitySettings are
 // no longer stored in state so this cleans up the old data.
 private cleanState() {
 	def sentNotifications = state.sentNotifications
-	// def devicesCache = state.devicesCache
 	state.clear()
 	state.sentNotifications = sentNotifications
-	// state.devicesCache = devicesCache
 }
-
-// // Remove cached data for devices no longer selected and
-// // add cached data for newly selected devices.
-// void initializeDevicesCache() {
-	// def dnis = getAllDNIs()
-	
-	// state.devicesCache?.removeAll { cache ->
-		// !dnis?.find { dni -> cache.dni == dni }
-	// }	
-// }
 
 def performScheduledTasks() {
 	state.lastPerformedScheduledTasks = new Date().time
@@ -1268,12 +1125,8 @@ def performScheduledTasks() {
 		checkDevices()		
 	}
 	if (canPollDevices(state.lastDevicePoll)) {
-		// runIn(61, refreshDeviceActivityCache)
 		pollDevices()
 	}
-	// else {
-		// refreshDeviceActivityCache()
-	// }
 }
 
 void pollDevices() {
@@ -1286,117 +1139,6 @@ private canPollDevices(lastPoll) {
 	return settings.pollingEnabled &&
 		timeElapsed((lastPoll ?: 0) + msMinute(safeToInteger(settings.pollingInterval, 5)), true)
 }
-
-// void refreshDeviceActivityCache() {
-	// runIn(30, refreshDeviceStateCache)
-	// refreshDeviceEventCache()		
-// }
-
-// void refreshDeviceStateCache() {
-	// refreshDeviceActivityTypeCache("state")	
-// }
-
-// void refreshDeviceEventCache() {
-	// refreshDeviceActivityTypeCache("event")	
-// }
-
-// void refreshDeviceActivityTypeCache(activityType) {
-	// def devices = getAllDevices()
-	// def deviceCount = devices?.size()
-	// if (deviceCount) {
-		// def cachedTime = new Date().time
-		
-		// def deviceIndex = (safeToInteger(state."${activityType}DeviceIndex", -1))
-		
-		// def checkHistoryCutoff = (new Date().time - (safeToInteger(settings?.checkHistoryThreshold, 12) * 60 * 60 * 1000))
-		
-		// for (int i= 0; i < deviceCount; i++) {
-			
-			// deviceIndex += 1
-			// deviceIndex = (deviceIndex >= deviceCount) ? 0 : deviceIndex
-			// def device = devices[deviceIndex]
-			
-			// def lastActivity
-			// def lastActivityDate = device.getLastActivity()
-			
-			// // if (lastActivityDate && (lastActivityDate.time >= checkHistoryCutoff)) {
-				// lastActivity = [
-					// name: "unknown",
-					// value: "",
-					// time: lastActivityDate.time,
-					// type: activityType
-				// ]
-			// // }
-			// // else {
-				// // if (activityType == "event") {
-					// // if (!lastActivity) {
-						// // lastActivity = getDeviceLastDeviceEvent(device)
-					// // }
-				// // }
-				// // else {
-					// // if (!lastActivity) {
-						// // lastActivity = getDeviceLastStateChange(device)
-					// // }
-				// // }
-			// // }
-			
-			// if (lastActivity) {
-				// lastActivity.cachedTime = cachedTime
-				// saveLastActivityToDeviceCache(device.deviceNetworkId, lastActivity)
-			// }
-			
-			// // if (((new Date().time) - cachedTime) > 10000) {
-				// // logTrace "Aborted refreshing ${activityType} cache after device ${devices[deviceIndex]?.displayName} [${deviceIndex}]. (Refreshed ${i} of the ${deviceCount} devices)"
-				
-				// // if ((new Date().time - (state.lastPerformedScheduledTasks ?: 0)) < 190000) {
-					// // // Start the refresh again in 1 minute as long as it won't overlap with the refresh that occurs every 5 minutes.
-					// // if (activityType == "event") {
-						// // runIn(61, refreshDeviceEventCache)
-					// // }
-					// // else {
-						// // runIn(61, refreshDeviceStateCache)
-					// // }
-				// // }				
-				// // i = deviceCount
-			// // }
-		// }	
-		// state."${activityType}CachedTime" = cachedTime
-		// state."${activityType}DeviceIndex" = deviceIndex
-	// }	
-// }
-
-// void saveLastActivityToDeviceCache(dni, lastActivity) {
-	// def found = false
-	// def activity = getDeviceCache(dni).activity.collect {
-		// if (it.type == lastActivity.type) {
-			// found = true
-			// return (it.time < lastActivity.time) ? lastActivity : it
-		// }
-		// else {
-			// return it
-		// }
-	// }
-
-	// if (!found) {
-		// activity << lastActivity
-	// }
-		
-	// getDeviceCache(dni).activity = activity
-// }
-
-// private getDeviceCache(dni) {
-	// if (!state.devicesCache) {
-		// state.devicesCache = []
-	// }
-	
-	// def deviceCache = state.devicesCache.find { cache -> "$dni" == "${cache.dni}" }
-	// if (!deviceCache) {
-		// deviceCache = [dni: "$dni", activity: [ ]]
-		// state.devicesCache << deviceCache
-	// }
-	// return deviceCache
-// }
-
 
 // Generates notifications if device attributes fall outside of specified thresholds and ensures that notifications are spaced at least 5 minutes apart.
 def checkDevices() {
@@ -1570,15 +1312,11 @@ def checkLastEvents() {
 		
 		def item = getDeviceLastEventListItem(it)
 
-		// def isOld = (item.value > getLastEventThresholdMS() || offlineOverride(it.status))
 		def isOld = (item.value > getLastEventThresholdMS())
 		
 		def message = null
 		if (isOld) {
 			message = "Last Event Alert - ${getDeviceStatusTitle(it, item.status)}"
-			// if (offlineOverride(it.status)) {
-				// message = "${message} (OFFLINE)"
-			// }
 		}
 		   		
 		handleDeviceNotification(it, message, "lastEvent", lastEventNotificationsRepeat)
@@ -1877,7 +1615,6 @@ private initializeAppEndpoint() {
 		try {
 			def accessToken = createAccessToken()
 			if (accessToken) {
-				// state.endpoint = apiServerUrl("/api/token/${accessToken}/smartapps/installations/${app.id}/")
 				state.endpoint = "${fullApiServerUrl('')}?access_token=${accessToken}"
 			}
 		} 
