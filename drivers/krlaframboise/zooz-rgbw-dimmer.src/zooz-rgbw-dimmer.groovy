@@ -1,11 +1,14 @@
 /**
- *  Zooz RGBW Dimmer v1.0 (SmartThings Port)
+ *  Zooz RGBW Dimmer v1.0.1 (SmartThings Port)
  *  (Model: ZEN31)
  *
  *  Author: 
  *    Kevin LaFramboise (krlaframboise)
  *
  *  Changelog:
+ *
+ *    1.0.1 (11/26/2019)
+ *      - bug fixes
  *
  *    1.0 (11/25/2019)
  *      - Initial Release
@@ -187,7 +190,7 @@ private initialize() {
 		sendActiveProgramEvent(0)
 	}
 	
-	if (device.currentValue("switch")) {
+	if (!device.currentValue("switch")) {
 		sendEvent(name: "switch", value: "on", displayed: false)
 		sendEvent(name: "colorSwitch", value: "on", displayed: false)
 		sendEvent(name: "whiteSwitch", value: "on", displayed: false)
