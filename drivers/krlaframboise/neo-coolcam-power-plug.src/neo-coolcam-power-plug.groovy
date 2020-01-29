@@ -1,5 +1,5 @@
 /**
- *  Neo Coolcam Power Plug v1.2.6 (HUBITAT)
+ *  Neo Coolcam Power Plug v1.2.7 (HUBITAT)
  *  (Models: NAS-WR02ZU, NAS-WR02ZE, NAS-WR01ZE)
  *
  *  Author: 
@@ -9,6 +9,9 @@
  *    
  *
  *  Changelog:
+ *
+ *    1.2.7 (01/29/2020)
+ *      - Hubitat port
  *
  *    1.2.6 (05/30/2019)
  *      - Added fingerprint for new US model and fixed model check.
@@ -363,7 +366,7 @@ private switchBinarySetCmd(val) {
 }
 
 private configSetCmd(param, value) {
-	return secureCmd(zwave.configurationV1.configurationSet(parameterNumber: param.num, size: param.size, configurationValue: intToHexBytes(value, param.size)))
+	return secureCmd(zwave.configurationV1.configurationSet(parameterNumber: param.num, size: param.size, scaledConfigurationValue: value))
 }
 
 private configGetCmd(param) {
@@ -443,7 +446,7 @@ def zwaveEvent(hubitat.zwave.commands.configurationv1.ConfigurationReport cmd) {
 	
 	def param = configParams.find { it.num == cmd.parameterNumber }
 	if (param) {	
-		def val = hexBytesToInt(cmd.configurationValue,cmd.size)
+		def val = cmd.scaledConfigurationValue
 		
 		logDebug "${param.name}(#${param.num}) = ${val}"
 		setParamStoredValue(param.num, val)
