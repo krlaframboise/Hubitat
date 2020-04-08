@@ -102,20 +102,6 @@ def pageMain() {
 			paragraph ""
 		}
 		
-		section("<big><b>Garage Door Operating Delay</b></big>") {
-			paragraph "The Operating Delay determines the amount of time it waits after changing the door control child device to OPENING/CLOSING before sending the on command to the Relay Switch."
-			
-			paragraph "This feature allows you to use the opening/closing statuses to trigger a siren to turn on before the door starts moving."
-			
-			input "operatingDelay", "enum",
-				title: "<b>Select Operating Delay:</b>",
-				required: false,
-				defaultValue: operatingDelaySetting,
-				options: operatingDelayOptions
-			
-			paragraph ""
-		}
-		
 		section("<big><b>Garage Door Operating Duration</b></big>") {
 			paragraph "The Operating Duration should be set to a value greater than or equal to the amount of time it takes for the physical garage door to open/close."
 			
@@ -128,6 +114,20 @@ def pageMain() {
 				options: operatingDurationOptions
 			
 			paragraph ""			
+		}
+		
+		section("<big><b>Garage Door Operating Delay</b></big>") {
+			paragraph "The Operating Delay determines the amount of time it waits after changing the door control child device to OPENING/CLOSING before sending the on command to the Relay Switch."
+			
+			paragraph "This feature allows you to use the opening/closing statuses to trigger a siren to turn on before the door starts moving."
+			
+			input "operatingDelay", "enum",
+				title: "<b>Select Operating Delay:</b>",
+				required: false,
+				defaultValue: operatingDelaySetting,
+				options: operatingDelayOptions
+			
+			paragraph ""
 		}	
 		
 		section("<big><b>Logging</b></big>") {			
