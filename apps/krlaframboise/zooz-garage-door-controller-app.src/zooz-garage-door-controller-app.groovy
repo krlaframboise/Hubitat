@@ -58,43 +58,43 @@ preferences {
 def pageMain() {
 	dynamicPage(name: "pageMain", title: "", install: true, uninstall: false) {
 		
-		section("<b>Garage Door Name</b>") {
+		section("<big><b>Garage Door Name</b></big>") {
 			paragraph "The Garage Door Name will be displayed in the Garage Door list when you open this SmartApp."
 
 			paragraph "The child Door Control device created for this door will use this name followed by 'Opener'."
 			
-			label title: "Enter Garage Door Name:", required: true
+			label title: "<b>Enter Garage Door Name:</b>", required: true
 			
 			paragraph ""
 		}
 		
-		section("<b>Relay Switch</b>") {
+		section("<big><b>Relay Switch</b></big>") {
 			paragraph "The Relay Switch will be used to activate the garage door."
 			
 			input "relaySwitch", "capability.switch",
-				title: "Select Relay Switch:",
+				title: "<b>Select Relay Switch:</b>",
 				required: true
 			
 			paragraph ""
 		}
 		
-		section("<b>Open/Close Sensor</b>") {
+		section("<big><b>Open/Close Sensor</b></big>") {
 			paragraph "The Open/Close Sensor will be used to determine the state of the garage door."
 			
 			input "contactSensor", "capability.contactSensor",
-				title: "Select Open/Close Sensor:",
+				title: "<b>Select Open/Close Sensor:</b>",
 				required: true
 			
 			paragraph ""
 		}
 		
-		section("<b>Relay Switch Auto-Off Timer</b>") {
+		section("<big><b>Relay Switch Auto-Off Timer</b></big>") {
 			paragraph "The Auto-Off Timer will turn the relay off after a few seconds making it a momentary switch."
 			
 			paragraph "Leave this setting disabled if you already set the switch type on the ZEN16 to Garage Door Mode."
 			
 			input "autoOffDelay", "enum",
-				title: "Select Auto-Off Timer:",
+				title: "<b>Select Auto-Off Timer:</b>",
 				required: false,
 				defaultValue: autoOffDelaySetting,
 				options: autoOffDelayOptions
@@ -102,13 +102,13 @@ def pageMain() {
 			paragraph ""
 		}
 		
-		section("<b>Garage Door Operating Delay</b>") {
+		section("<big><b>Garage Door Operating Delay</b></big>") {
 			paragraph "The Operating Delay determines the amount of time it waits after changing the door control child device to OPENING/CLOSING before sending the on command to the Relay Switch."
 			
 			paragraph "This feature allows you to use the opening/closing statuses to trigger a siren to turn on before the door starts moving."
 			
 			input "operatingDelay", "enum",
-				title: "Select Operating Delay:",
+				title: "<b>Select Operating Delay:</b>",
 				required: false,
 				defaultValue: operatingDelaySetting,
 				options: operatingDelayOptions
@@ -116,11 +116,13 @@ def pageMain() {
 			paragraph ""
 		}
 		
-		section("<b>Garage Door Operating Duration</b>") {
-			paragraph "The Operating Duration determines the amount of time the door control child device should stay in the OPENING and CLOSING states."
+		section("<big><b>Garage Door Operating Duration</b></big>") {
+			paragraph "The Operating Duration should be set to a value greater than or equal to the amount of time it takes for the physical garage door to open/close."
 			
+			paragraph "The door control child device will stay in the OPENING and CLOSING states during that duration and set to the contact sensor's state afterwards."
+									
 			input "operatingDuration", "enum",
-				title: "Select Operating Duration:",
+				title: "<b>Select Operating Duration:</b>",
 				required: false,
 				defaultValue: operatingDurationSetting,
 				options: operatingDurationOptions
@@ -128,12 +130,18 @@ def pageMain() {
 			paragraph ""			
 		}	
 		
-		section("<b>Logging</b>") {			
+		section("<big><b>Logging</b></big>") {			
 			input "debugLogging", "bool", 
-				title: "Enable debug logging?",
+				title: "<b>Enable debug logging?</b>",
 				defaultValue: true, 
 				required: false
-		}	
+		}
+		
+		if (state.installed) {
+			section() {
+				href "pageRemove", title: "Remove Garage Door", description: ""
+			}
+		}		
 	}
 }
 
@@ -141,7 +149,7 @@ def pageMain() {
 def pageRemove() {
 	dynamicPage(name: "pageRemove", title: "", install: false, uninstall: true) {
 		section() {			
-			paragraph "WARNING: You are about to remove the Zooz Garage Door Controller SmartApp and ALL of the Garage Door Opener devices it created.", required: true, state: null
+			paragraph "<b>WARNING:</b> You are about to remove this door and the Garage Door Opener device it created.", required: true, state: null
 		}
 	}
 }
