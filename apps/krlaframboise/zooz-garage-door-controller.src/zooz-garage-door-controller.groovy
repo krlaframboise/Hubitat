@@ -49,12 +49,12 @@ preferences {
 def pageMain() {	
 	dynamicPage(name: "pageMain", title: "", install: true, uninstall: false) {
 		section() {
-			app(name: "garageDoors", title: "Tap to Add a Garage Door", appName: "Zooz Garage Door Controller App", namespace: "krlaframboise", multiple: true, uninstall: false)
+			app(name: "garageDoors", title: "Create a Garage Door", appName: "Zooz Garage Door Controller App", namespace: "krlaframboise", multiple: true, uninstall: false)
 		}
 		
 		if (state.installed) {
 			section() {
-				href "pageRemove", title: "", description: "Remove All Garage Doors"
+				href "pageRemove", title: "Remove All Garage Doors", description: ""
 			}
 		}
 	}	
@@ -64,7 +64,7 @@ def pageMain() {
 def pageRemove() {
 	dynamicPage(name: "pageRemove", title: "", install: false, uninstall: true) {
 		section() {			
-			paragraph "WARNING: You are about to remove the Zooz Garage Door Controller App and ALL of the Garage Door Opener devices it created.", required: true, state: null
+			paragraph "<b>WARNING:</b> You are about to remove the Zooz Garage Door Controller App and ALL of the Garage Door Opener devices it created.", required: true, state: null
 		}
 	}
 }
