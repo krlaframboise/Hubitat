@@ -2,9 +2,6 @@
  *  Zooz Outdoor Motion Sensor Advanced v1.0  (FIRMWARE >= 2.0)
  *    (Model: ZSE29)
  *
- *  Author:
- *    Kevin LaFramboise (krlaframboise)
- *
  *  Changelog:
  *
  *    1.0 (05/04/2020)
