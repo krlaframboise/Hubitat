@@ -1,8 +1,11 @@
 /*
- *  Zooz Garage Door v1.0	(Drivers Code)
+ *  Zooz Garage Door v1.0.1	(Drivers Code)
  *
  *
  *  Changelog:
+ *
+ *    1.0.1 (05/09/2020)
+ *      - Added Import Url
  *
  *    1.0 (04/11/2020)
  *      - Initial Release
@@ -28,7 +31,8 @@ metadata {
 	definition (
 		name: "Zooz Garage Door",
 		namespace: "Zooz",
-		author: "Kevin LaFramboise (@krlaframboise)"
+		author: "Kevin LaFramboise (@krlaframboise)",
+		importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/drivers/zooz/zooz-garage-door.src/zooz-garage-door.groovy"
 	) {
 		capability "Actuator"
 		capability "Sensor"
