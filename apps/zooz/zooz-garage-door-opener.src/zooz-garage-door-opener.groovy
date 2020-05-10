@@ -1,10 +1,13 @@
 /*
- *  Zooz Garage Door Opener v1.0	(Apps Code)
+ *  Zooz Garage Door Opener v1.0.1	(Apps Code)
  *
  *
  * WARNING: Using a homemade garage door opener can be dangerous so use this code at your own risk. 
  *
  *  Changelog:
+ *
+ *    1.0.1 (05/09/2020)
+ *      - Added Import Url
  *
  *    1.0 (04/11/2020)
  *      - Initial Release
@@ -36,7 +39,8 @@ definition(
     iconUrl: "https://raw.githubusercontent.com/krlaframboise/Resources/master/Zooz/garage.png",
     iconX2Url: "https://raw.githubusercontent.com/krlaframboise/Resources/master/Zooz/garage.png",
     iconX3Url: "https://raw.githubusercontent.com/krlaframboise/Resources/master/Zooz/garage.png",
-	installOnOpen: true
+	installOnOpen: true,
+	importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/apps/zooz/zooz-garage-door-opener.src/zooz-garage-door-opener.groovy"
 )
 
 
