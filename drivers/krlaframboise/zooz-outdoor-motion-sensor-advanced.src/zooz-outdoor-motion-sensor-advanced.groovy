@@ -50,7 +50,12 @@ import groovy.transform.Field
 ]
 
 metadata {
-	definition (name:"Zooz Outdoor Motion Sensor Advanced", namespace:"krlaframboise", author: "Kevin LaFramboise", importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/drivers/krlaframboise/zooz-outdoor-motion-sensor-advanced.src/zooz-outdoor-motion-sensor-advanced.groovy") {
+	definition (
+		name:"Zooz Outdoor Motion Sensor Advanced", 
+		namespace:"krlaframboise", 
+		author: "Kevin LaFramboise", 
+		importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/drivers/krlaframboise/zooz-outdoor-motion-sensor-advanced.src/zooz-outdoor-motion-sensor-advanced.groovy"
+	) {			
 		capability "Sensor"
 		capability "Battery"
 		capability "Motion Sensor"
