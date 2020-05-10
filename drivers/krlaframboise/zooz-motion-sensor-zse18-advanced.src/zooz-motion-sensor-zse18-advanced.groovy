@@ -1,8 +1,11 @@
 /**
- *  Zooz Motion Sensor ZSE18 Advanced v1.0
+ *  Zooz Motion Sensor ZSE18 Advanced v1.0.1
  *  (Model: ZSE18)
  *
  *  Changelog:
+ *
+ *    1.0.1 (05/09/2020)
+ *      - Added Import Url
  *
  *    1.0 (05/04/2018)
  *      - Initial Release
@@ -48,7 +51,8 @@ metadata {
 	definition (
 		name: "Zooz Motion Sensor ZSE18 Advanced",
 		namespace: "krlaframboise",
-		author: "Kevin LaFramboise"
+		author: "Kevin LaFramboise",
+		importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/drivers/krlaframboise/zooz-motion-sensor-zse18-advanced.src/zooz-motion-sensor-zse18-advanced.groovy"
 	) {
 		capability "Sensor"
 		capability "Motion Sensor"
