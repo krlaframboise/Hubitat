@@ -1,8 +1,11 @@
 /**
- *  Zooz Outdoor Motion Sensor Advanced v1.0  (FIRMWARE >= 2.0)
+ *  Zooz Outdoor Motion Sensor Advanced v1.0.1  (FIRMWARE >= 2.0)
  *    (Model: ZSE29)
  *
  *  Changelog:
+ *
+ *    1.0.1 (05/09/2020)
+ *      - Added Import Url
  *
  *    1.0 (05/04/2020)
  *      - Initial Release
@@ -47,7 +50,7 @@ import groovy.transform.Field
 ]
 
 metadata {
-	definition (name:"Zooz Outdoor Motion Sensor Advanced", namespace:"krlaframboise", author: "Kevin LaFramboise") {
+	definition (name:"Zooz Outdoor Motion Sensor Advanced", namespace:"krlaframboise", author: "Kevin LaFramboise", importUrl: "https://raw.githubusercontent.com/krlaframboise/Hubitat/master/drivers/krlaframboise/zooz-outdoor-motion-sensor-advanced.src/zooz-outdoor-motion-sensor-advanced.groovy") {
 		capability "Sensor"
 		capability "Battery"
 		capability "Motion Sensor"
