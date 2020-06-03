@@ -1,10 +1,13 @@
 /*
- *  Zooz Garage Door Opener App v1.0.1	(Apps Code)
+ *  Zooz Garage Door Opener App v1.1	(Apps Code)
  *
  *
  * WARNING: Using a homemade garage door opener can be dangerous so use this code at your own risk. 
  *
  *  Changelog:
+ *
+ *    1.1 (06/03/2020)
+ *      - Added optional virtual lock device that can be used by Alexa to control the garage door using a password.
  *
  *    1.0.1 (05/09/2020)
  *      - Added Import Url
@@ -130,7 +133,18 @@ def pageMain() {
 				options: operatingDelayOptions
 			
 			paragraph ""
-		}	
+		}
+
+		section("<big><b>Virtual Lock</b></big>") {
+			paragraph "Amazon Alexa supports creating a password to control locks so enabling this setting creates a lock device that can be used to control the door and the locked/unlocked status will be synced with the door device's closed/open status."
+						
+			input "createLock", "bool",
+				title: "<b>Create Virtual Lock?</b>",
+				required: false,
+				defaultValue: false
+			
+			paragraph ""
+		}		
 		
 		section("<big><b>Logging</b></big>") {			
 			input "debugLogging", "bool", 
@@ -186,19 +200,35 @@ def updated() {
 }
 
 void initialize() {
-	if (!childDoorOpener) {			
+	def door = childDoorOpener
+	if (!door) {			
 		runIn(3, createChildGarageDoorOpener)
-	}			
+	}
+	
+	def lock = childLock
+	if (settings?.createLock && !lock) {
+		lock = createChildLock()
+		sendLockEvent(door?.currentContact)
+	}
+	else if (!settings?.createLock && lock) {
+		deleteChildDevice(lock.deviceNetworkId)
+	}
+	
+	if (lock) {
+		subscribe(lock, "lock", lockEventHandler)
+	}
+	
 	subscribe(settings?.relaySwitch, "switch.on", relaySwitchOnEventHandler)
 	subscribe(settings?.contactSensor, "contact", contactEventHandler)		
 }
 
-void createChildGarageDoorOpener() {
+def createChildGarageDoorOpener() {
+	def child
 	def name = "${app.label}"
 	logDebug "Creating ${name}"	
 
 	try {
-		def child = addChildDevice(
+		child = addChildDevice(
 			"Zooz",
 			"Zooz Garage Door",
 			"${app.id}-door",
@@ -215,6 +245,25 @@ void createChildGarageDoorOpener() {
 	catch (ex) {
 		log.error "Unable to create the Garage Door.  You must install the Zooz Garage Door Driver in order to use this App."
 	}
+	return child
+}
+
+def createChildLock() {
+	def name = "${app.label} Lock"
+	
+	logDebug "Creating ${name}"	
+
+	return addChildDevice(
+		"hubitat",
+		"Virtual Lock",
+		"${app.id}-lock",
+		null,
+		[
+			name: "${name}",
+			label: "${name}",
+			completedSetup: true
+		]
+	)
 }
 
 
@@ -288,6 +337,16 @@ void turnOffRelaySwitch() {
 }
 
 
+void lockEventHandler(evt) {
+	if (evt.value in ["locked", "unlocked"]) {
+		if (!state.ignoreNextLockEvent) {
+			handleDigitalOpenCloseCommand((evt.value == "locked") ? "closing" : "opening")
+		}
+		state.ignoreNextLockEvent = false
+	}	
+}
+
+
 void contactEventHandler(evt) {
 	logDebug "Contact sensor changed to ${evt.value}"
 	String doorStatus = childDoorOpener?.currentValue("door")
@@ -338,13 +397,28 @@ void sendDoorEvents(value) {
 	
 	if (value in ["open", "closed"]) {
 		doorOpener?.parse([name: "contact", value: value, displayed: false])
+		sendLockEvent(value)
+	}	
+}
+
+void sendLockEvent(contactValue) {
+	if (settings?.createLock && (contactValue in ["open", "closed"])) {
+		def lock = childLock
+		String lockValue = (contactValue == "open" ? "unlocked" : "locked")
+		if (lockValue != lock.currentLock) {
+			state.ignoreNextLockEvent = true
+			lock?.sendEvent(name: "lock", value: lockValue)
+		}
 	}
 }
 
 
 def getChildDoorOpener() {
-	def children = childDevices
-	return children ? children[0] : null
+	return childDevices?.find { it.deviceNetworkId?.endsWith("-door") }	
+}
+
+def getChildLock() {
+	return childDevices?.find { it.deviceNetworkId?.endsWith("-lock") }	
 }
 
 
