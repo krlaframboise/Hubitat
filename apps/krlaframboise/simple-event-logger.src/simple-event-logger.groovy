@@ -1,5 +1,5 @@
 /**
- *  Simple Event Logger - SmartApp v 1.5
+ *  HUBITAT: Simple Event Logger - SmartApp v 1.0.1
  *
  *  Author: 
  *    Kevin LaFramboise (krlaframboise)
@@ -9,50 +9,11 @@
  *
  *  Changelog:
  *
- *    1.5 (02/19/2019)
- *      -  Replaced obsolete javascript code in Groovy Script.
- *
- *    1.4.1 (10/22/2017)
- *      -  The Google Script does NOT need to be updated.
- *      -  Added "Activity" attribute which will log device "online/offline" changes.
- *      -  Added setting that allows you to log the event descriptionText to the description field instead of just the value and unit.
- *      -  Fixed timeout issue with the Device Attribute Exclusions screen.
- *
- *    1.3 (02/26/2017)
- *      - Requires Google Script Update
- *      - Added maximum catch-up setting that restricts the date range it uses when catching up from missed runs.
- *      - Added option for Log Reporting so when it's enabled it creates a column for hour and short date. 
- *
- *    1.2.1 (01/28/2017)
- *      - New version of Google Script.
- *
- *    1.2 (01/22/2017)
- *      - Added archive functionality for when the sheet is full or by specific number of events.
- *
- *    1.1.3 (01/19/2017)
- *      - Retrieve events from state instead of event history.
- *      - Retrieves up to 200 events per attribute for each device instead of a total of 50 events per device.
- *      - Changed first run to previous hour instead of previous 24 hours to prevent warnings caused by the large number of events that get logged.
- *
- *    1.1.1 (01/04/2017)
- *      - Enabled submit on change for device lists so that the event list populates on initial install. 
- *
- *    1.1.0 (01/02/2017)
- *      - Moved Event Exclusions to another page to prevent timeout and added abort feature so that it stops adding exclusion fields if it runs out of time.
- *      - Fixed log space calculation and added setting to the options section that when enabled, deletes extra columns in the spreadsheet which allows you to log more.
- *
- *    1.0.3 (01/01/2017)
- *      - Disabled submit on change behavior for device selection page and made the select events field display all events instead of just the supported ones.
- *      - Added additional error handling and logging in case the other change doesn't fix the reported error.
- *
- *    1.0.2 (12/29/2016)
- *      - Added additional logging and verification of the Web App Url.
- *
- *    1.0.1 (12/28/2016)
- *      - Bug fix for devices with null attributes
- *
- *    1.0.0 (12/26/2016)
+ *    1.0.1 (06/??/2019)
  *      - Initial Release
+ *
+ *    Based upon SmartThings version
+ *    1.5 (02/19/2019)
  *
  *  Licensed under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in
@@ -68,8 +29,6 @@
  *  permissions and limitations under the License.
  *
  */
- 
-include 'asynchttp_v1'
  
 definition(
     name: "Simple Event Logger",
@@ -91,7 +50,7 @@ preferences {
 	page(name: "createTokenPage")
 }
 
-def version() { return "01.05.00" }
+def version() { return "01.00.01" }
 def gsVersion() { return "01.05.00" }
 
 def mainPage() {
@@ -394,7 +353,7 @@ private buildSummary(items) {
 	def summary = ""
 	items?.each {
 		summary += summary ? "\n" : ""
-		summary += "   ${it}"
+		summary += "   ${it}"
 	}
 	return summary
 }
@@ -568,6 +527,8 @@ private getNewLastEventTimeMS(startedMS, firstEventMS) {
 	}
 }
 
+
+
 private getLogCatchUpFrequencySetting() {
 	return settings?.logCatchUpFrequency ?: "1 Hour"
 }
@@ -597,9 +558,10 @@ private getLogCatchUpFrequencySettingMS() {
 }
 
 private postEventsToGoogleSheets(events) {
+	def postbackUrl = "${state.endpoint}".replace("?access_token", "update-logging-status?access_token")
 	def jsonOutput = new groovy.json.JsonOutput()
 	def jsonData = jsonOutput.toJson([
-		postBackUrl: "${state.endpoint}update-logging-status",
+		postBackUrl: postbackUrl,
 		archiveOptions: getArchiveOptions(),
 		logDesc: (settings?.logDesc != false),
 		logReporting: (settings?.logReporting == true),
@@ -613,7 +575,14 @@ private postEventsToGoogleSheets(events) {
 		body: jsonData
 	]	
 	
-	asynchttp_v1.post(processLogEventsResponse, params)
+	// asynchttp_v1.post(processLogEventsResponse, params)
+	try {
+		asynchttpPost('processLogEventsResponse', params)
+	} catch (groovyx.net.http.HttpResponseException hre) {
+		log.error "postJsonData Error:${hre.getResponse()?.getData()}"
+	} catch (Exception e) {
+		log.error "postJsonData Error:${e.getMessage()}"
+	}
 }
 
 private getArchiveOptions() {
@@ -629,11 +598,11 @@ def processLogEventsResponse(response, data) {
 	if (response?.status == 302) {
 		logTrace "${getWebAppName()} Response: ${response.status}"
 	}
-	else if ( response?.errorMessage?.contains("Read timeout to script.google.com") ) {
-		logTrace "Timeout while waiting for Google Logging to complete."
+	else if (response?.hasError()) {
+		logWarn "Unexpected error from ${getWebAppName()}: ${response?.errorMessage}"
 	}
 	else {
-		logWarn "Unexpected response from ${getWebAppName()}: ${response?.errorMessage}"
+		logWarn "Unexpected response from ${getWebAppName()}: ${response?.status}"
 	}
 }
 
@@ -643,7 +612,8 @@ private initializeAppEndpoint() {
 			logDebug "Creating Access Token"
 			def accessToken = createAccessToken()
 			if (accessToken) {
-				state.endpoint = apiServerUrl("/api/token/${accessToken}/smartapps/installations/${app.id}/")
+				def path = ""
+				state.endpoint = "${fullApiServerUrl(path)}?access_token=${accessToken}"
 			}
 		}		
 	} 
@@ -686,6 +656,9 @@ def api_updateLoggingStatus() {
 		status.success = false
 		logDebug "The ${getWebAppName()} postback has no data."
 	}	
+
+	log.warn "api_updateLoggingStatus: [data:${data}, status:${status}"
+
 	state.loggingStatus = status
 	logLoggingStatus()
 }
@@ -730,7 +703,8 @@ private getNewEvents(startDate, endDate) {
 	
 	getSelectedDevices()?.each  { device ->
 		getDeviceAllowedAttrs(device?.displayName)?.each { attr ->
-			device.statesBetween("${attr}", startDate, endDate, [max: maxEventsSetting])?.each { event ->
+		device.statesSince("${attr}", startDate, [max: "${maxEventsSetting}".toInteger()])?.each { event ->
+			// device.statesBetween("${attr}", startDate, endDate, [max: maxEventsSetting])?.each { event ->
 				events << [
 					time: getFormattedLocalTime(event.date?.time),
 					device: device.displayName,
@@ -773,8 +747,9 @@ private getMaxEventsSetting() {
 private getFormattedLocalTime(utcTime) {
 	if (utcTime) {
 		try {
-			def localTZ = TimeZone.getTimeZone(location.timeZone.ID)
-			def localDate = new Date(utcTime + localTZ.getOffset(utcTime))	
+			// def localTZ = TimeZone.getTimeZone(location.timeZone.ID)
+			// def localDate = new Date(utcTime + localTZ.getOffset(utcTime))
+			def localDate = new Date(utcTime)
 			return localDate.format("MM/dd/yyyy HH:mm:ss")
 		}
 		catch (e) {
