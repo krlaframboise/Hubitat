@@ -68,9 +68,9 @@ metadata {
 		capability "Sensor"
 		capability "Battery"
 		capability "PushableButton"
-        capability "DoubleTapableButton"
-        capability "HoldableButton"
-        capability "ReleasableButton"
+		capability "DoubleTapableButton"
+		capability "HoldableButton"
+		capability "ReleasableButton"
 		capability "Refresh"
 
 		attribute "pushed3x", "number"
