@@ -1,13 +1,16 @@
 /*
- *  Zooz Remote Switch ZEN34 Advanced 	v1.0
+ *  Zooz Remote Switch ZEN34 Advanced 	v1.0.1
  *
  *  Changelog:
+ *
+ *    1.0.1 (01/10/2021)
+ *      - Fixes for latest firmware
  *
  *    1.0 (11/14/2020)
  *      - Initial Release
  *
  *
- *  Copyright 2020 Zooz
+ *  Copyright 2021 Zooz
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -84,6 +87,8 @@ metadata {
 		fingerprint deviceId: "F001", mfr: "0312", prod: "0004", inClusters:"0x5E,0x85,0x8E,0x59,0x55,0x86,0x72,0x5A,0x73,0x80,0x5B,0x26,0x9F,0x70,0x84,0x6C,0x7A", deviceJoinName: "Zooz Remote Switch ZEN34 Advanced"
 		fingerprint deviceId: "F001", mfr: "027A", prod: "0004", inClusters:"0x5E,0x55,0x9F,0x6C", deviceJoinName: "Zooz Remote Switch ZEN34 Advanced"
 		fingerprint deviceId: "F001", mfr: "027A", prod: "0004", inClusters:"0x5E,0x85,0x8E,0x59,0x55,0x86,0x72,0x5A,0x73,0x80,0x5B,0x26,0x9F,0x70,0x84,0x6C,0x7A", deviceJoinName: "Zooz Remote Switch ZEN34 Advanced"
+		fingerprint deviceId: "F001", mfr: "027A", prod: "7000", inClusters:"0x5E,0x55,0x9F,0x6C", deviceJoinName: "Zooz Remote Switch ZEN34 Advanced"
+		fingerprint deviceId: "F001", mfr: "027A", prod: "7000", inClusters:"0x5E,0x85,0x8E,0x59,0x55,0x86,0x72,0x5A,0x73,0x80,0x5B,0x26,0x9F,0x70,0x84,0x6C,0x7A", deviceJoinName: "Zooz Remote Switch ZEN34 Advanced"
 	}
 
 	preferences {
@@ -383,6 +388,9 @@ void zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpIntervalReport cmd) {
 
 void zwaveEvent(hubitat.zwave.commands.wakeupv2.WakeUpNotification cmd) {
 	logDebug "Device Woke Up..."
+	
+	runIn(3, refreshSyncStatus)
+	state.hasWokenUp = true
 
 	List<String> cmds = getConfigureCmds()
 	if (cmds) {
@@ -483,6 +491,12 @@ void zwaveEvent(hubitat.zwave.commands.centralscenev1.CentralSceneNotification c
 		if (action) {
 			logDebug "Button ${btn} ${action}"
 			sendEvent(name: action, value: btn, isStateChange: true)
+		}
+		
+		if (!state.hasWokenUp) {
+			// device hasn't been put to sleep after inclusion and is draining the battery so put it to sleep.
+			state.hasWokenUp = true
+			sendCommands([wakeUpNoMoreInfoCmd()])
 		}
 	}
 }
