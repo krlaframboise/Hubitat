@@ -1,10 +1,12 @@
 /*
- *  Zooz Garage Door Opener App v1.2	(Apps Code)
+ *  Zooz Garage Door Opener App v1.3	(Apps Code)
  *
  *
  * WARNING: Using a homemade garage door opener can be dangerous so use this code at your own risk.
  *
  *  Changelog:
+ *    1.3 (02/02/2021)
+ *      - Added Chime and Light options.
  *
  *    1.2 (08/10/2020)
  *      - Added notifications for when door fails to open or close.
@@ -138,7 +140,45 @@ def pageMain() {
 			paragraph ""
 		}
 
-		section("<big><b>Notifications</b></big>") {
+		section("<big><b>Chime device options</b></big>") {
+			paragraph ""
+
+			paragraph "This feature allows you pick a device to play a sound durring opening/closing statuses."
+
+			input "chimeDevice", "capability.chime",
+				title: "<b>Select Chime Device:</b>",
+                multiple: true,
+				required: false,
+                submitOnChange: true
+
+
+            if (chimeDevice){
+            
+            input "soundNumber", "number",
+				title: "<b>Select Sound Number:</b>",
+                multiple: false,
+                defaultValue: "3"
+				required: true
+
+			paragraph ""
+            }
+		}
+        
+        section("<big><b>Light device options</b></big>") {
+			paragraph ""
+
+			paragraph "This feature allows you flash a light durring opening/closing statuses."
+
+			input "lightDevice", "capability.switchLevel",
+				title: "<b>Select Light to Flash:</b>",
+                multiple: true,
+				required: false
+
+			paragraph ""
+
+		}
+        
+        section("<big><b>Notifications</b></big>") {
 			paragraph "Send push notification when door fails to open and/or close."
 
 			input "failedOpenDevices", "capability.notification",
@@ -327,6 +367,12 @@ void handleDigitalOpenCloseCommand(doorStatus) {
 void turnOnRelaySwitch() {
 	logDebug "Turning on Relay Switch..."
 	settings?.relaySwitch?.on()
+        if (chimeDevice){
+            settings?.chimeDevice?.playSound(soundNumber)
+        }
+        if (lightDevice){
+            settings?.lightDevice?.flash()
+    }
 }
 
 
@@ -339,7 +385,7 @@ void relaySwitchOnEventHandler(evt) {
 
 	switch (childDoorOpener?.currentValue("door")) {
 		case "open":
-			sendDoorEvents("closing")
+			sendDoorEvents("closing")              
 			break
 		case "closed":
 			sendDoorEvents("opening")
@@ -397,6 +443,13 @@ void checkDoorStatus() {
 	logTrace "checkDoorStatus()..."
 
 	String contactStatus = settings?.contactSensor?.currentValue("contact")
+    if (chimeDevice){
+        settings?.chimeDevice?.stop()
+        settings?.chimeDevice?.off()       
+    }
+    if (lightDevice){
+        settings?.lightDevice?.off()
+    }
 
 	if (childDoorOpener?.currentValue("door") != contactStatus) {
 		sendDoorEvents(contactStatus)
@@ -405,8 +458,8 @@ void checkDoorStatus() {
 	if (autoOffDelaySetting && (settings?.relaySwitch?.currentValue("switch") == "on")) {
 		// The switch is still on for some reason which will prevent the relay from triggering the door next time so turn it off.
 		logDebug "Turning off Relay Switch (backup)..."
-		settings?.relaySwitch?.off()
-	}
+		settings?.relaySwitch?.off()      
+    }
 }
 
 
